@@ -1,60 +1,55 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\TalkController;
-use App\Jobs\AddDatatoDB;
-use App\Jobs\SendNotification;
-use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Cache;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\Auth\RegistroController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FoodUserController;
+use App\Http\Controllers\MisValesController;
+use App\Http\Controllers\PerfilController;
+use App\Http\Controllers\UsuariosAsociadosController;
+use App\Models\FoodUser;
 use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
 
 Route::get('/', function () {
     return view('welcome');
+})->name('login');
+
+Route::get('/registro', function () {
+    return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/registro/{code}', [RegistroController::class, 'goToRegistroView']);
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+Route::group(['middleware' => 'auth'], function () {
+    Route::get('/dashboard', [DashboardController::class, 'goToDashboardView'])->name('dashboard');
 
-    Route::get('talks/create', [TalkController::class, 'create'])->name('talks.create');
-    Route::post('talks', [TalkController::class, 'store'])->name('talks.store');
+    Route::get('/seleccionar', [FoodUserController::class, 'goToSeleccionarView'])->name('seleccionar');
 
-    
+    Route::get('/mis-vales', [MisValesController::class, 'goToMisValesView'])->name('misVales');
+
+    Route::get('/listado-usuarios', [UsuariosAsociadosController::class, 'goToUsuariosAsociadosView'])->name('usuariosListado');
+
+    Route::post('/perfil/actualizar', [PerfilController::class, 'updatePerfil'])->name('perfil.actualizar');
+
+    Route::get('/perfil', [PerfilController::class, 'goToPerfilView'])->name('perfil');
+
+    Route::post('/saveSeleccion', [FoodUserController::class, 'guardarRacionesSeleccionadas'])->name('saveSeleccion');
+
+    Route::get('/dashboard/vales/{userId}', [FoodUserController::class, 'valesTodayByUser'])->name('valesTodayByUser');
 });
 
-Route::get('/jobs', function() {
-
-    /** 
-     * Test Jobs are working...
-     * dispatch SendNotification and AddDataToDB Job
-     */
-
-    echo "Your jobs are being dispatching....";
-    Bus::chain([
-        new AddDatatoDB,
-        new SendNotification
-    ])->dispatch();
-});
-
-Route::get('/cache', function() {
-
-    /**
-     * Testing your cache infra is working...
-     */
-    echo "Storing inside the redis cache...\n";
-    Cache::store('redis')->put('bar', 'baz', 600); // 10 Minutes
-    Cache::put('paas', 'railway'); // store indefinitely
-
-    $value = Cache::get('bar');
-    $deployment = Cache::get('paas');
-    echo "This is the result from the cache for bar...{$value} \n";
-    echo "This is the result from the cache for paas...{$deployment}";
-    
-});
-
-require __DIR__.'/auth.php';
+Route::post('/registro', [RegistroController::class, 'registro'])->name('registro-user');
+Route::post('/login', [LoginController::class, 'login'])->name('login-user');
+Route::post('/logout', [LogoutController::class, 'logout'])->name('logout-user');
