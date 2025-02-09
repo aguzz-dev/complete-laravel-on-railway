@@ -48,6 +48,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/saveSeleccion', [FoodUserController::class, 'guardarRacionesSeleccionadas'])->name('saveSeleccion');
 
     Route::get('/dashboard/vales/{userId}', [FoodUserController::class, 'valesTodayByUser'])->name('valesTodayByUser');
+
+    Route::post('/dashboard/vales/editar', [FoodUserController::class, 'editValesByUser'])->name('valesTodayByUser');
 });
 
 Route::post('/registro', [RegistroController::class, 'registro'])->name('registro-user');

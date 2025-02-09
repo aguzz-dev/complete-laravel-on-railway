@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Vales de Comida</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
@@ -438,9 +439,10 @@
 
             // Send updated selections
             $.ajax({
-                url: '/api/update-meals',
+                url: '/dashboard/vales/editar',
                 method: 'POST',
                 data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'), // Agregar el token CSRF
                     userId: currentUserId,
                     selections: selections
                 },
@@ -452,8 +454,7 @@
                         confirmButtonColor: '#34d399'
                     }).then(() => {
                         closeModal();
-                        // Refresh the table
-                        table.ajax.reload();
+                        window.location.reload();
                     });
                 },
                 error: function() {
@@ -465,8 +466,8 @@
                     });
                 }
             });
-        });
 
+        });
         // Close modal when clicking outside
         $(window).click(function(event) {
             if ($(event.target).is('#editModal')) {

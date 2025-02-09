@@ -17,7 +17,7 @@ class DashboardController extends Controller
             ->groupBy('food_id')
             ->pluck('cantidad', 'food_id');
 
-        $comidasCreadasByUnidad = Food::pluck('descripcion', 'id');
+        $comidasCreadasByUnidad = Food::where('unit_id', \auth()->user()->unit_id)->pluck('descripcion', 'id');
 
         $comidasList = [];
         foreach ($comidasCreadasByUnidad as $id => $nombre) {
@@ -58,9 +58,12 @@ class DashboardController extends Controller
             if (!isset($groupedData[$key])) {
                 $groupedData[$key] = $entry;
             } else {
-                $groupedData[$key]['Merienda'] |= $entry['Merienda'];
-                $groupedData[$key]['Pop'] |= $entry['Pop'];
-                $groupedData[$key]['Brunch'] |= $entry['Brunch'];
+                // Iterar dinámicamente sobre las claves de comidas
+                foreach ($comidasCreadasByUnidad as $comida) {
+                    if (isset($entry[$comida])) {
+                        $groupedData[$key][$comida] |= $entry[$comida];
+                    }
+                }
             }
         }
 

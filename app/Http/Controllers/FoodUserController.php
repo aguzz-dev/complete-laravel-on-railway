@@ -66,4 +66,25 @@ class FoodUserController extends Controller
         return response()->json($comidasFinales);
     }
 
+    public function editValesByUser(Request $request)
+    {
+        // Eliminar vales previos del usuario para hoy
+        FoodUser::where('date', Carbon::today()->format('Y-m-d') . ' 00:00:00')
+            ->where('user_id', $request->userId)
+            ->delete();
+
+        // Obtener los IDs de comidas disponibles en la unidad
+        $comidasCreadasByUnidad = Food::where('unit_id', auth()->user()->unit_id)->pluck('id', 'descripcion');
+
+        // Recorrer las selecciones del usuario
+        foreach ($request->selections as $comida => $seleccion) {
+            if ($seleccion === "true" && isset($comidasCreadasByUnidad[$comida])) {
+                FoodUser::create([
+                    'date' => Carbon::today()->format('Y-m-d') . ' 00:00:00',
+                    'user_id' => $request->userId,
+                    'food_id' => $comidasCreadasByUnidad[$comida], // Asociar el ID correcto
+                ]);
+            }
+        }
+    }
 }
