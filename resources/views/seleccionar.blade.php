@@ -37,6 +37,7 @@
         }
 
         h1 {
+            position: relative;
             text-align: center;
             margin-bottom: 10px;
             font-size: 2rem;
@@ -154,7 +155,8 @@
 <body>
 <div class="dashboard-container">
     @include('menu')
-    <h1>Selección de raciones</h1>
+    <br>
+    <h1>Selección<br>de raciones</h1>
     <p class="subtitle">Seleccione sus comidas para la semana</p>
 
     <div id="days-container"></div>

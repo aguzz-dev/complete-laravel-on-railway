@@ -10,6 +10,7 @@
         </div>
         @if (\Illuminate\Support\Facades\Auth::user()->status === 'superadmin')
             <a href="{{ route('dashboard') }}">Listado de Vales</a>
+            <a href="{{ route('usuariosListado') }}">Listado de Usuarios</a>
         @endif
         <a href="{{ route('seleccionar') }}">Selecciónar raciones</a>
         <a href="{{ route('misVales') }}">Mis vales</a>
