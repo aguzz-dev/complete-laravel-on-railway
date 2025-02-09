@@ -183,6 +183,11 @@
             font-size: 0.75rem;
         }
 
+        optgroup {
+            background-color: #1c2637;
+            color: white;
+        }
+
         @media (max-width: 480px) {
             .register-container {
                 padding: 1.5rem;
@@ -211,17 +216,35 @@
                 </svg>
                 <select id="grado" name="grado" required>
                     <option value="">Seleccione su grado</option>
-                    <option value="coronel">Coronel</option>
-                    <option value="teniente_coronel">Teniente Coronel</option>
-                    <option value="mayor">Mayor</option>
-                    <option value="capitan">Capitán</option>
-                    <option value="teniente">Teniente</option>
-                    <option value="subteniente">Subteniente</option>
-                    <option value="sargento_primero">Sargento Primero</option>
-                    <option value="sargento">Sargento</option>
-                    <option value="cabo_primero">Cabo Primero</option>
-                    <option value="cabo">Cabo</option>
-                    <option value="soldado">Soldado</option>
+                    <optgroup label="Oficiales">
+                        <option value="TG">TG (Teniente General)</option>
+                        <option value="GD">GD (General de División)</option>
+                        <option value="GB">GB (General de Brigada)</option>
+                        <option value="CY">CY (Coronel Mayor)</option>
+                        <option value="CR">CR (Coronel)</option>
+                        <option value="TC">TC (Teniente Coronel)</option>
+                        <option value="MY">MY (Mayor)</option>
+                        <option value="CT">CT (Capitán)</option>
+                        <option value="TP">TP (Teniente Primero)</option>
+                        <option value="TT">TT (Teniente)</option>
+                        <option value="ST">ST (Subteniente)</option>
+                    </optgroup>
+                    <optgroup label="Suboficiales">
+                        <option value="SM">SM (Suboficial Mayor)</option>
+                        <option value="SP">SP (Suboficial Principal)</option>
+                        <option value="SA">SA (Sargento Ayudante)</option>
+                        <option value="SI">SI (Sargento Primero)</option>
+                        <option value="SG">SG (Sargento)</option>
+                        <option value="CI">CI (Cabo Primero)</option>
+                        <option value="CB">CB (Cabo)</option>
+                    </optgroup>
+                    <optgroup label="Soldados">
+                        <option value="VP">VP (Voluntario de Primera)</option>
+                        <option value="VS">VS (Voluntario de Segunda)</option>
+                    </optgroup>
+                    <optgroup label="Otros">
+                        <option value="AC">Agente Civil</option>
+                    </optgroup>
                 </select>
             </div>
         </div>

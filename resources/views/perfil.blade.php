@@ -90,6 +90,7 @@
 
         .detail-item {
             margin-bottom: 1rem;
+
         }
 
         .detail-label {
@@ -103,16 +104,41 @@
             color: #fff;
             width: 100%;
             padding: 0.5rem;
-            background-color: #1e293b;
-            border: 1px solid #334155;
+            background-color: transparent;
+            border: 1px solid transparent;
             border-radius: 0.25rem;
             transition: all 0.3s ease;
+            pointer-events: none;
         }
 
-        .detail-value[readonly] {
-            border-color: transparent;
-            background-color: transparent;
-            padding-left: 0;
+        .detail-value:not([readonly]):not(:disabled) {
+            background-color: #1e293b;
+            border-color: #334155;
+            pointer-events: auto;
+        }
+
+        /* Estilos específicos para el select */
+        select.detail-value {
+            cursor: default;
+            background-image: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        select.detail-value:not(:disabled) {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+
+        select.detail-value option {
+            background-color: #1e293b;
+            color: white;
+            padding: 0.5rem;
         }
 
         .profile-actions {
@@ -194,7 +220,38 @@
                 <h2 class="section-title">Información Personal</h2>
                 <div class="detail-item">
                     <div class="detail-label">Grado</div>
-                    <input type="text" name="grado" class="detail-value" value="{{ ucwords($user->grado) }}" readonly>
+                    <select name="grado" class="detail-value" disabled>
+                        <optgroup label="Oficiales">
+                            <option value="TG" {{ $user->grado == 'TG' ? 'selected' : '' }}>TG (Teniente General)</option>
+                            <option value="GD" {{ $user->grado == 'GD' ? 'selected' : '' }}>GD (General de División)</option>
+                            <option value="GB" {{ $user->grado == 'GB' ? 'selected' : '' }}>GB (General de Brigada)</option>
+                            <option value="CY" {{ $user->grado == 'CY' ? 'selected' : '' }}>CY (Coronel Mayor)</option>
+                            <option value="CR" {{ $user->grado == 'CR' ? 'selected' : '' }}>CR (Coronel)</option>
+                            <option value="TC" {{ $user->grado == 'TC' ? 'selected' : '' }}>TC (Teniente Coronel)</option>
+                            <option value="MY" {{ $user->grado == 'MY' ? 'selected' : '' }}>MY (Mayor)</option>
+                            <option value="CT" {{ $user->grado == 'CT' ? 'selected' : '' }}>CT (Capitán)</option>
+                            <option value="TP" {{ $user->grado == 'TP' ? 'selected' : '' }}>TP (Teniente Primero)</option>
+                            <option value="TT" {{ $user->grado == 'TT' ? 'selected' : '' }}>TT (Teniente)</option>
+                            <option value="ST" {{ $user->grado == 'ST' ? 'selected' : '' }}>ST (Subteniente)</option>
+                        </optgroup>
+                        <optgroup label="Suboficiales">
+                            <option value="SM" {{ $user->grado == 'SM' ? 'selected' : '' }}>SM (Suboficial Mayor)</option>
+                            <option value="SP" {{ $user->grado == 'SP' ? 'selected' : '' }}>SP (Suboficial Principal)</option>
+                            <option value="SA" {{ $user->grado == 'SA' ? 'selected' : '' }}>SA (Sargento Ayudante)</option>
+                            <option value="SI" {{ $user->grado == 'SI' ? 'selected' : '' }}>SI (Sargento Primero)</option>
+                            <option value="SG" {{ $user->grado == 'SG' ? 'selected' : '' }}>SG (Sargento)</option>
+                            <option value="CI" {{ $user->grado == 'CI' ? 'selected' : '' }}>CI (Cabo Primero)</option>
+                            <option value="CB" {{ $user->grado == 'CB' ? 'selected' : '' }}>CB (Cabo)</option>
+                        </optgroup>
+                        <optgroup label="Soldados">
+                            <option value="VP" {{ $user->grado == 'VP' ? 'selected' : '' }}>VP (Voluntario de Primera)</option>
+                            <option value="VS" {{ $user->grado == 'VS' ? 'selected' : '' }}>VS (Voluntario de Segunda)</option>
+                        </optgroup>
+                        <optgroup label="Otros">
+                            <option value="AC" {{ $user->grado == 'AC' ? 'selected' : '' }}>Agente Civil</option>
+                        </optgroup>
+                    </select>
+
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">Nombre</div>
@@ -233,52 +290,60 @@
     </div>
 </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('edit-profile-form');
         const editButton = document.getElementById('editButton');
         const cancelButton = document.getElementById('cancelButton');
         const inputs = form.querySelectorAll('.detail-value');
+        const gradoSelect = form.querySelector('select[name="grado"]');
         let isEditing = false;
         let originalValues = {};
+
+        // Establecer el valor inicial del select desde la base de datos
+        const userGrado = "{{ $user->grado }}";
+        if (userGrado) {
+            gradoSelect.value = userGrado;
+        }
 
         function enableEditing() {
             inputs.forEach(input => {
                 originalValues[input.name] = input.value;
-                input.removeAttribute('readonly');
-                input.style.backgroundColor = '#1e293b';
-                input.style.borderColor = '#334155';
-                input.style.paddingLeft = '0.5rem';
+                if (input.tagName.toLowerCase() === 'select') {
+                    input.disabled = false;
+                } else {
+                    input.removeAttribute('readonly');
+                }
             });
             form.classList.add('editing');
             editButton.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                        <polyline points="7 3 7 8 15 8"></polyline>
-                    </svg>
-                    Guardar Cambios
-                `;
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            Guardar Cambios
+        `;
             isEditing = true;
         }
 
         function disableEditing() {
             inputs.forEach(input => {
-                input.setAttribute('readonly', true);
-                input.style.backgroundColor = 'transparent';
-                input.style.borderColor = 'transparent';
-                input.style.paddingLeft = '0';
+                if (input.tagName.toLowerCase() === 'select') {
+                    input.disabled = true;
+                } else {
+                    input.setAttribute('readonly', true);
+                }
             });
             form.classList.remove('editing');
             editButton.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                    </svg>
-                    Editar Perfil
-                `;
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            Editar Perfil
+        `;
             isEditing = false;
         }
 
@@ -304,26 +369,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     color: '#fff'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Obtener los valores de los inputs
-                        let grado = document.querySelector('input[name="grado"]').value;
-                        let nombre = document.querySelector('input[name="nombre"]').value;
-                        let apellido = document.querySelector('input[name="apellido"]').value;
-                        let dni = document.querySelector('input[name="dni"]').value;
-                        let email = document.querySelector('input[name="email"]').value;
-                        let password = document.querySelector('input[name="password"]')?.value || ''; // Si no existe, asigna una cadena vacía
+                        let formData = {
+                            _token: '{{ csrf_token() }}',
+                            grado: gradoSelect.value,
+                            nombre: document.querySelector('input[name="nombre"]').value,
+                            apellido: document.querySelector('input[name="apellido"]').value,
+                            dni: document.querySelector('input[name="dni"]').value,
+                            email: document.querySelector('input[name="email"]').value
+                        };
 
                         $.ajax({
                             url: '{{ route('perfil.actualizar') }}',
                             type: 'POST',
-                            data: {
-                                _token: '{{ csrf_token() }}',
-                                grado: grado,
-                                nombre: nombre,
-                                apellido: apellido,
-                                dni: dni,
-                                email: email,
-                                password: password
-                            },
+                            data: formData,
                             success: function(response) {
                                 Swal.fire({
                                     title: 'Éxito',
@@ -350,7 +408,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         });
-
 
         cancelButton.addEventListener('click', function() {
             Swal.fire({
