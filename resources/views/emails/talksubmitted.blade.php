@@ -1,1 +1,0 @@
-<h3> This is the talk submitted email </h3>
