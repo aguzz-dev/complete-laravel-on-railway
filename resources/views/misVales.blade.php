@@ -19,7 +19,7 @@
         min-height: 100vh;
         background-color: #0f172a;
         color: #fff;
-        padding: 1rem;
+        padding: 20px;
     }
 
     .dashboard-container {
