@@ -201,6 +201,52 @@
         .swal2-cancel {
             background: #334155 !important;
         }
+
+        .mb-3 {
+            margin-bottom: 1rem;
+        }
+
+        /* Estilos para el select */
+        .form-select {
+            width: auto; /* Ajusta el ancho según el contenido */
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #495057;
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        /* Estilos para el botón */
+        .btn-editarRol {
+            background-color: #007bff; /* Color azul */
+            color: white;
+            border: none;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.15s ease-in-out;
+        }
+
+        .btn-editarRol:hover {
+            background-color: #0056b3; /* Color azul más oscuro al pasar el mouse */
+        }
+
+        /* Alinear elementos en la misma línea */
+        .d-flex {
+            display: flex;
+        }
+
+        .align-items-center {
+            align-items: center;
+        }
+
+        .me-2 {
+            margin-right: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -211,7 +257,16 @@
             <img src="https://i.imgur.com/BLJohUm.png" alt="Profile">
         </div>
         <h1 class="profile-name">{{ ucwords($user->grado) }} {{  ucwords($user->nombre) }} {{  ucwords($user->apellido) }}</h1>
-        <div class="profile-role">{{ $user->status === 'admin' ? 'Administrador' :  'Usuario' }}</div>
+        <div class="profile-role">
+            @php
+                $roles = [
+                    'superadmin' => 'Super Administrador',
+                    'admin' => 'Administrador',
+                    'usuario' => 'Usuario'
+                ];
+            @endphp
+            {{ $roles[$user->status] ?? 'Usuario' }}
+        </div>
     </div>
 
     <div class="profile-details">
@@ -290,9 +345,19 @@
             </div>
 
             @else
-                <a type="button" href="{{route('usuariosListado')}}" style="text-decoration: none" class="btn btn-primary">
-                    Volver al listado
-                </a>
+                <div class="role-container">
+                    @if (auth()->user()->status === 'superadmin')
+                        <div class="role-controls">
+                            <label for="roleSelect" class="form-label">Cambiar Rol:</label>
+                            <select id="roleSelect" class="form-select">
+                                <option value="admin" {{ $user->status === 'admin' ? 'selected' : '' }}>Administrador</option>
+                                <option value="usuario" {{ $user->status === 'usuario' ? 'selected' : '' }}>Usuario</option>
+                            </select>
+                            <button style="margin-top: 10px;" type="button" id="changeRoleBtn" class="btn btn-editarRol">Actualizar Rol</button>
+                        </div>
+                    @endif
+                    <a href="{{ route('usuariosListado') }}" class="btn btn-primary" style="text-decoration: none;">Volver al listado</a>
+                </div>
             @endif
         </form>
     </div>
@@ -430,6 +495,44 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     cancelEditing();
+                }
+            });
+        });
+    });
+
+    $(document).ready(function () {
+        $('#changeRoleBtn').click(function () {
+            let userId = {{ $user->id }};
+            let newRole = $('#roleSelect').val();
+
+            $.ajax({
+                url: "/usuario/rol",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    id: userId,
+                    role: newRole
+                },
+                success: function (response) {
+                    Swal.fire({
+                        title: 'Éxito',
+                        text: 'Perfil actualizado exitosamente',
+                        icon: 'success',
+                        background: '#1e293b',
+                        color: '#fff'
+                    });
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000); // 1000 ms = 1 segundo
+                },
+                error: function (xhr) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Hubo un problema al actualizar el perfil',
+                        icon: 'error',
+                        background: '#1e293b',
+                        color: '#fff'
+                    });
                 }
             });
         });

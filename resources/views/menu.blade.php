@@ -8,9 +8,10 @@
         <div class="menu-header">
             Menú
         </div>
-        @if (\Illuminate\Support\Facades\Auth::user()->status === 'superadmin')
+        @if (in_array(Auth::user()->status, ['superadmin', 'admin']))
             <a href="{{ route('dashboard') }}">Listado de Vales</a>
             <a href="{{ route('usuariosListado') }}">Listado de Usuarios</a>
+            <a href="{{ route('descargarReportes') }}">Descargar Reportes</a>
         @endif
         <a href="{{ route('seleccionar') }}">Selecciónar raciones</a>
         <a href="{{ route('misVales') }}">Mis vales</a>

@@ -33,7 +33,7 @@ class RegistroController extends Controller
             'apellido' => $request->apellido,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'status' => 1,
+            'status' => 3,
             'unit_id' => $unitId
         ]);
 

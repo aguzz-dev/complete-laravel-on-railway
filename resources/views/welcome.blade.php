@@ -95,8 +95,21 @@
                     window.location.href = response.redirectUrl;
                 },
                 error: function(xhr, status, error) {
-                    alert('dsadqasdasdas');
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        let errorMessage = '';
+
+                        errorMessage += `DNI: ${errors}\n`;
+
+                        Swal.fire({
+                            title: 'Error en el registro',
+                            text: errorMessage,
+                            icon: 'error',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    }
                 }
+
             });
         });
     });

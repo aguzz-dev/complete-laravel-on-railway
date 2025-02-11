@@ -57,17 +57,11 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::delete('/usuario/{userId}', [UsuariosAsociadosController::class, 'destroy']);
 
-});
+    Route::get('/descargar-reportes', [ReportController::class, 'goToDescargarReportesView'])->name('descargarReportes');
 
+    Route::post('/generar-pdf', [ReportController::class, 'generatePDF'])->name('generarPDF');
 
-Route::get('/generar-pdf', function () {
-    $data = ['nombre' => 'Juan', 'edad' => 25]; // Datos que deseas pasar a la vista
-
-    // Generar el PDF desde la vista Blade
-    $pdf = PDF::loadView('report', $data);
-
-    // Forzar la descarga del PDF con el nombre 'archivo.pdf'
-    return $pdf->download('archivo.pdf');
+    Route::post('/usuario/rol', [PerfilController::class, 'CambiarRol']);
 });
 
 Route::post('/registro', [RegistroController::class, 'registro'])->name('registro-user');

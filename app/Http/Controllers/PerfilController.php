@@ -52,4 +52,23 @@ class PerfilController extends Controller
         $user['ReadOnly'] = true;
         return view('perfil', compact('user'));
     }
+
+    public function CambiarRol(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:users,id',
+            'role' => 'required|in:admin,usuario',
+        ]);
+
+        $user = User::findOrFail($request->id);
+
+        if ($user->status == $request->role) {
+            return response()->json(['message' => 'Se mantuvo el rol sin cambios correctamente']);
+        }
+        $user->status = $request->role;
+        $user->save();
+
+        return response()->json(['message' => 'Rol actualizado correctamente']);
+    }
+
 }
