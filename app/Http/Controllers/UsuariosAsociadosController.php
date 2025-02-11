@@ -13,4 +13,9 @@ class UsuariosAsociadosController extends Controller
         $users = User::where('unit_id', Auth::user()->unit_id)->get();
         return view('usuariosAsociados', compact('users'));
     }
+
+    public function destroy($userId)
+    {
+        User::destroy($userId);
+    }
 }

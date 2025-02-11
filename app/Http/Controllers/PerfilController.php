@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -42,5 +43,13 @@ class PerfilController extends Controller
 
         return redirect()->route('perfil')
             ->with('success', 'Perfil actualizado correctamente.');
+    }
+
+
+    public function verPerfilUsuario($userId)
+    {
+        $user = User::where('id', $userId)->first();
+        $user['ReadOnly'] = true;
+        return view('perfil', compact('user'));
     }
 }

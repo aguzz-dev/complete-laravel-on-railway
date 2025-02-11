@@ -7,8 +7,10 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FoodUserController;
 use App\Http\Controllers\MisValesController;
 use App\Http\Controllers\PerfilController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UsuariosAsociadosController;
 use App\Models\FoodUser;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -45,11 +47,27 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('/perfil', [PerfilController::class, 'goToPerfilView'])->name('perfil');
 
+    Route::get('/perfil/{userId}', [PerfilController::class, 'verPerfilUsuario'])->name('perfil.ver');
+
     Route::post('/saveSeleccion', [FoodUserController::class, 'guardarRacionesSeleccionadas'])->name('saveSeleccion');
 
     Route::get('/dashboard/vales/{userId}', [FoodUserController::class, 'valesTodayByUser'])->name('valesTodayByUser');
 
     Route::post('/dashboard/vales/editar', [FoodUserController::class, 'editValesByUser'])->name('valesTodayByUser');
+
+    Route::delete('/usuario/{userId}', [UsuariosAsociadosController::class, 'destroy']);
+
+});
+
+
+Route::get('/generar-pdf', function () {
+    $data = ['nombre' => 'Juan', 'edad' => 25]; // Datos que deseas pasar a la vista
+
+    // Generar el PDF desde la vista Blade
+    $pdf = PDF::loadView('report', $data);
+
+    // Forzar la descarga del PDF con el nombre 'archivo.pdf'
+    return $pdf->download('archivo.pdf');
 });
 
 Route::post('/registro', [RegistroController::class, 'registro'])->name('registro-user');

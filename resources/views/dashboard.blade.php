@@ -6,10 +6,13 @@
     <title>Sistema de Vales de Comida</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        /* Base styles */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #0f172a;
@@ -21,26 +24,28 @@
         .dashboard {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 0 15px;
         }
 
         h1 {
             text-align: center;
             margin-bottom: 30px;
             color: #34d399;
+            font-size: 24px;
         }
 
+        /* Cards Container */
         .cards-container {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
             gap: 20px;
+            margin-bottom: 30px;
         }
 
         .card {
             background-color: rgba(30, 41, 59, 0.8);
             border-radius: 12px;
             padding: 20px;
-            width: 30%;
             text-align: center;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s ease-in-out;
@@ -53,31 +58,34 @@
         .card h3 {
             margin-top: 0;
             color: #34d399;
-            font-size: 1.5em;
+            font-size: 1.2em;
         }
 
         .card p {
             margin: 5px 0 0;
-            font-size: 1.2em;
+            font-size: 1em;
             color: #ffffff;
         }
 
+        /* Table Container */
         .table-container {
             background-color: rgba(30, 41, 59, 0.8);
             border-radius: 12px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
         }
 
         #users-table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 14px;
         }
 
         #users-table th, #users-table td {
             color: white;
             background-color: #0f172a;
-            padding: 12px;
+            padding: 10px;
             text-align: left;
             border-bottom: 1px solid #1e293b;
         }
@@ -86,89 +94,55 @@
             background-color: #1e293b;
             color: #34d399;
             font-weight: bold;
-        }
-
-        #users-table tbody tr:hover {
-            background-color: rgba(52, 211, 153, 0.1);
+            white-space: nowrap;
         }
 
         .btn-editar {
             background-color: #34d399;
             color: #0f172a;
             border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
+            padding: 6px 12px;
+            border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.2s;
             font-weight: bold;
+            font-size: 12px;
+            white-space: nowrap;
         }
 
-        .btn-editar:hover {
-            background-color: #10b981;
-        }
-
-        /* DataTables customization */
+        /* DataTables Responsive */
         .dataTables_wrapper {
             color: #cbd5e1;
+            font-size: 14px;
         }
 
-        .dataTables_length, .dataTables_filter, .dataTables_info, .dataTables_paginate {
+        .dataTables_length,
+        .dataTables_filter,
+        .dataTables_info,
+        .dataTables_paginate {
             margin-bottom: 10px;
             color: #cbd5e1;
         }
 
-        .dataTables_length select, .dataTables_filter input {
+        .dataTables_length select,
+        .dataTables_filter input {
             background-color: #1e293b;
             color: #ffffff;
             border: 1px solid #475569;
             border-radius: 4px;
-            padding: 5px;
+            padding: 4px;
+            margin: 0 4px;
         }
 
-        .dataTables_length label, .dataTables_filter label {
-            color: white;
+        .dataTables_filter {
+            width: 100%;
+            margin-bottom: 15px;
         }
 
-        .dataTables_info {
-            color: #34d399 !important;
+        .dataTables_filter input {
+            width: calc(100% - 70px);
+            max-width: 200px;
         }
-
-        .dataTables_paginate .paginate_button {
-            color: #cbd5e1 !important;
-            background-color: #1e293b !important;
-            border: 1px solid #475569 !important;
-            transition: background-color 0.2s ease-in-out;
-        }
-
-        .dataTables_paginate .paginate_button:hover {
-            background-color: #34d399 !important;
-            color: #1e293b !important;
-        }
-
-        .dataTables_paginate .paginate_button.current {
-            background-color: #34d399 !important;
-            color: #1e293b !important;
-        }
-
-        /* SweetAlert2 Custom Styles */
-        .swal2-popup {
-            background: #1e293b !important;
-            color: #fff !important;
-        }
-
-        .swal2-title, .swal2-html-container {
-            color: #fff !important;
-        }
-
-        .swal2-confirm {
-            background: #10b981 !important;
-        }
-
-        .swal2-cancel {
-            background: #334155 !important;
-        }
-        /* Previous styles remain unchanged */
-
         /* Modal styles */
         .modal {
             display: none;
@@ -181,10 +155,11 @@
             z-index: 1000;
         }
 
+        /* Modal Styles */
         .modal-content {
             position: relative;
             background-color: #1e293b;
-            margin: 15% auto;
+            margin: 14% auto;
             padding: 20px;
             border-radius: 12px;
             width: 80%;
@@ -192,17 +167,8 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .modal-header {
-            margin-bottom: 20px;
-        }
-
         .modal-header h2 {
-            color: #34d399;
-            margin: 0;
-        }
-
-        .modal-body {
-            margin-bottom: 20px;
+            font-size: 1.2em;
         }
 
         .meal-option {
@@ -221,16 +187,14 @@
             cursor: pointer;
         }
 
+
         .meal-option label {
-            color: #ffffff;
-            font-size: 1.1em;
-            cursor: pointer;
+            font-size: 1em;
         }
 
         .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .btn {
@@ -240,6 +204,96 @@
             font-weight: bold;
             cursor: pointer;
             transition: background-color 0.2s;
+        }
+
+        /* Media Queries */
+        @media screen and (min-width: 640px) {
+            .cards-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .btn-editar {
+                font-size: 14px;
+                padding: 8px 15px;
+            }
+        }
+
+        @media screen and (min-width: 1024px) {
+            .cards-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+
+            #users-table {
+                font-size: 16px;
+            }
+
+            .dataTables_wrapper {
+                font-size: 16px;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+
+            .btn {
+                font-size: 16px;
+            }
+        }
+
+        /* DataTables Responsive Styles */
+        .dtr-details {
+            width: 100%;
+        }
+
+        .dtr-details li {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .dtr-details li:last-child {
+            border-bottom: none;
+        }
+
+        .dtr-title {
+            font-weight: bold;
+            color: #34d399;
+            margin-right: 10px;
+        }
+
+        .dtr-data {
+            text-align: right;
+        }
+
+        /* Fix for DataTables responsive view */
+        table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control::before,
+        table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control::before {
+            background-color: #34d399;
+            color: #0f172a;
+        }
+
+        /* Pagination Responsive */
+        .dataTables_paginate {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 15px;
+        }
+
+        .paginate_button {
+            padding: 5px 10px !important;
+            min-width: 30px;
+            text-align: center;
         }
 
         .btn-save {
@@ -259,8 +313,6 @@
         .btn-cancel:hover {
             background-color: #334155;
         }
-
-        /* Previous styles remain unchanged */
     </style>
 </head>
 <body>
@@ -273,7 +325,7 @@
     </div>
 
     <div class="table-container">
-        <table id="users-table" class="display">
+        <table id="users-table" class="display responsive nowrap" style="width:100%">
             <thead>
             <tr>
                 <th>Nombre y Apellido</th>
@@ -288,7 +340,7 @@
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal remains the same -->
 <div id="editModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -333,12 +385,11 @@
             "colvis": "Visibilidad"
         }
     };
+
     $(document).ready(function() {
         // Your provided data
         const comidas = @json($comidas);
-
         const usuarios = @json($usuarios);
-        console.log(usuarios);
 
         // Generate cards
         const $cardsContainer = $('.cards-container');
@@ -346,11 +397,11 @@
 
         Object.values(comidas).forEach(comida => {
             const cardHtml = `
-                    <div class="card">
-                        <h3>${comida.nombre}</h3>
-                        <p>Cantidad: ${comida.cantidad}</p>
-                    </div>
-                `;
+                <div class="card">
+                    <h3>${comida.nombre}</h3>
+                    <p>Cantidad: ${comida.cantidad}</p>
+                </div>
+            `;
             $cardsContainer.append(cardHtml);
         });
 
@@ -361,6 +412,7 @@
         Object.values(comidas).forEach(comida => {
             $thead.find('th:last').before(`<th>${comida.nombre}</th>`);
         });
+
         const dataSet = usuarios.map(usuario => {
             const row = [usuario.nombre];
             Object.values(comidas).forEach(comida => {
@@ -370,34 +422,57 @@
             row.push('<button class="btn-editar">Editar</button>');
             return row;
         });
-        // Initialize DataTable with modified click handler
+
+        // Initialize DataTable with responsive features
         const table = $('#users-table').DataTable({
             data: dataSet,
             language: spanishLanguage,
             responsive: true,
             columns: [
                 { title: "Nombre y Apellido" },
-                ...Object.values(comidas).map(comida => ({ title: comida.nombre })),
+                ...Object.values(comidas).map(comida => ({
+                    title: comida.nombre,
+                    className: 'all' // Makes this column always visible
+                })),
                 {
                     title: "Acciones",
                     orderable: false,
                     searchable: false,
+                    className: 'all', // Makes this column always visible
                     render: function(data, type, row, meta) {
                         return `<button class="btn-editar" data-user-id="${usuarios[meta.row].id}">Editar</button>`;
                     }
                 }
-            ]
+            ],
+            // Responsive configuration
+            responsive: {
+                details: {
+                    display: $.fn.dataTable.Responsive.display.childRow,
+                    type: 'inline',
+                    renderer: function(api, rowIdx, columns) {
+                        let html = '<ul class="dtr-details">';
+                        for (let i = 0; i < columns.length; i++) {
+                            if (columns[i].hidden) {
+                                html += '<li>' +
+                                    '<span class="dtr-title">' + columns[i].title + '</span> ' +
+                                    '<span class="dtr-data">' + columns[i].data + '</span>' +
+                                    '</li>';
+                            }
+                        }
+                        html += '</ul>';
+                        return html;
+                    }
+                }
+            }
         });
 
-        // Modal functionality
+        // Rest of your JavaScript remains the same
         function openModal(userId) {
             currentUserId = userId;
-            // Fetch user's meal selections
             $.get(`/dashboard/vales/${userId}`, function(data) {
                 const modalBody = $('.modal-body');
                 modalBody.empty();
 
-                // Generate checkboxes for each meal
                 Object.entries(data).forEach(([mealName, isSelected]) => {
                     const checkbox = `
                         <div class="meal-option">
@@ -419,7 +494,6 @@
             currentUserId = null;
         }
 
-        // Event Handlers
         $(document).on('click', '.btn-editar', function() {
             const userId = $(this).data('user-id');
             openModal(userId);
@@ -437,12 +511,11 @@
                 selections[$(this).attr('name')] = $(this).is(':checked').toString();
             });
 
-            // Send updated selections
             $.ajax({
                 url: '/dashboard/vales/editar',
                 method: 'POST',
                 data: {
-                    _token: $('meta[name="csrf-token"]').attr('content'), // Agregar el token CSRF
+                    _token: $('meta[name="csrf-token"]').attr('content'),
                     userId: currentUserId,
                     selections: selections
                 },
@@ -466,13 +539,17 @@
                     });
                 }
             });
-
         });
-        // Close modal when clicking outside
+
         $(window).click(function(event) {
             if ($(event.target).is('#editModal')) {
                 closeModal();
             }
+        });
+
+        // Handle window resize
+        $(window).resize(function() {
+            table.columns.adjust().responsive.recalc();
         });
     });
 </script>

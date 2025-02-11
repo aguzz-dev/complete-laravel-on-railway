@@ -108,7 +108,7 @@
             color: white;
             font-size: 25px;
             left: 4px;
-            top: -2px;
+            top: -3.5px;
         }
 
         .toggle-week {

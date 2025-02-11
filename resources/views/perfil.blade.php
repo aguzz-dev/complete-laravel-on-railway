@@ -271,6 +271,7 @@
                     <input type="email" name="email" class="detail-value" value="{{ $user->email }}" readonly>
                 </div>
             </div>
+            @if(!isset($user['ReadOnly']))
             <div class="profile-actions">
                 <button type="button" id="editButton" class="btn btn-primary">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -287,6 +288,12 @@
                     Cancelar
                 </button>
             </div>
+
+            @else
+                <a type="button" href="{{route('usuariosListado')}}" style="text-decoration: none" class="btn btn-primary">
+                    Volver al listado
+                </a>
+            @endif
         </form>
     </div>
 </div>

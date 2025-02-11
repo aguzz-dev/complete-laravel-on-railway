@@ -17,7 +17,7 @@ class DashboardController extends Controller
             ->groupBy('food_id')
             ->pluck('cantidad', 'food_id');
 
-        $comidasCreadasByUnidad = Food::where('unit_id', \auth()->user()->unit_id)->pluck('descripcion', 'id');
+        $comidasCreadasByUnidad = Food::where('unit_id', auth()->user()->unit_id)->pluck('descripcion', 'id');
 
         $comidasList = [];
         foreach ($comidasCreadasByUnidad as $id => $nombre) {

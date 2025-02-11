@@ -15,7 +15,7 @@ class FoodUserController extends Controller
     {
         $user = auth()->user();
 
-        $comidasCreadasByUnidad = Food::pluck('id','descripcion');
+        $comidasCreadasByUnidad = Food::where('unit_id', auth()->user()->unit_id)->pluck('id','descripcion');
 
         $comidasSeleccionadasByUsuario = $user->foods()
             ->get();
@@ -50,7 +50,8 @@ class FoodUserController extends Controller
 
     public function valesTodayByUser($userId)
     {
-        $comidasCreadasByUnidad = Food::pluck('descripcion', 'id');
+        $comidasCreadasByUnidad = Food::where('unit_id', auth()->user()->unit_id)->pluck('descripcion', 'id');
+
 
         $comidasHoy = FoodUser::where('user_id', $userId)
             ->whereDate('date', Carbon::today())
