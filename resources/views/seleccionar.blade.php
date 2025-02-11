@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Selección de Comidas</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <style>
         :root {
@@ -147,6 +148,24 @@
             background-color: #00a583;
         }
 
+        /* SweetAlert2 Custom Styles */
+        .swal2-popup {
+            background: #1e293b !important;
+            color: #fff !important;
+        }
+
+        .swal2-title, .swal2-html-container {
+            color: #fff !important;
+        }
+
+        .swal2-confirm {
+            background: #10b981 !important;
+        }
+
+        .swal2-cancel {
+            background: #334155 !important;
+        }
+
         .hidden {
             display: none;
         }
@@ -279,11 +298,20 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function(response) {
-                    alert('Selección guardada exitosamente');
-                    console.log('Respuesta del servidor:', response);
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: 'Selección guardada correctamente',
+                        icon: 'success',
+                        confirmButtonColor: '#34d399'
+                    });
                 },
                 error: function(xhr, status, error) {
-                    alert('Error al guardar la selección');
+                    Swal.fire({
+                        title: '¡Oppss!',
+                        text: 'Error al guardar selección',
+                        icon: 'error',
+                        confirmButtonColor: '#34d399'
+                    });
                     console.error('Error:', xhr.responseText);
                 }
             });

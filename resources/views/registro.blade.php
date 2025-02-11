@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <link rel="icon" href="https://i.imgur.com/BLJohUm.png" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>ValesEA</title>
     <style>
         * {
@@ -188,6 +189,24 @@
             color: white;
         }
 
+        /* SweetAlert2 Custom Styles */
+        .swal2-popup {
+            background: #1e293b !important;
+            color: #fff !important;
+        }
+
+        .swal2-title, .swal2-html-container {
+            color: #fff !important;
+        }
+
+        .swal2-confirm {
+            background: #10b981 !important;
+        }
+
+        .swal2-cancel {
+            background: #334155 !important;
+        }
+
         @media (max-width: 480px) {
             .register-container {
                 padding: 1.5rem;
@@ -345,9 +364,14 @@
                     unit_id: codigo
                 },
                 success: function(response) {
-                    // Manejar la respuesta del servidor
-                    alert('Registro exitoso');
-                    window.location.href = '{{route('login')}}';
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: 'Usuario registrado correctamente',
+                        icon: 'success',
+                        confirmButtonColor: '#34d399'
+                    }).then(() => {
+                        window.location.href = '{{route('login')}}';
+                    });
                 },
                 error: function(xhr, status, error) {
                     // Manejar errores
