@@ -363,21 +363,27 @@
                     password: password,
                     unit_id: codigo
                 },
-                success: function(response) {
-                    Swal.fire({
-                        title: '¡Éxito!',
-                        text: 'Usuario registrado correctamente',
-                        icon: 'success',
-                        confirmButtonColor: '#34d399'
-                    }).then(() => {
-                        window.location.href = '{{route('login')}}';
-                    });
-                },
                 error: function(xhr, status, error) {
-                    // Manejar errores
-                    alert('Hubo un error en el registro');
-                    console.error(error);
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        let errorMessage = '';
+
+                        if (errors.dni) {
+                            errorMessage += `DNI: ${errors.dni[0]}\n`;
+                        }
+                        if (errors.email) {
+                            errorMessage += `Email: ${errors.email[0]}`;
+                        }
+
+                        Swal.fire({
+                            title: 'Error en el registro',
+                            text: errorMessage,
+                            icon: 'error',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    }
                 }
+
             });
         });
     });

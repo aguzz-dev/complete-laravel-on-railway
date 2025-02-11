@@ -26,4 +26,12 @@ class LoginRequest extends FormRequest
             'password' => 'required|string'
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+          'dni.required' => 'El campo DNI es obligatorio.',
+          'dni.exists' => 'El campo DNI no existe.',
+        ];
+    }
 }

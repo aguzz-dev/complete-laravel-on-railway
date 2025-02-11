@@ -30,4 +30,19 @@ class RegistroRequest extends FormRequest
             'email' => 'required|string|email|unique:users,email',
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'grado.required' => 'El campo grado es obligatorio',
+            'nombre.required' => 'El campo nombre es obligatorio',
+            'apellido.required' => 'El campo apellido es obligatorio',
+            'dni.required' => 'El campo dni es obligatorio',
+            'email.required' => 'El campo email es obligatorio',
+            'email.email' => 'El campo email debe ser un email',
+            'email.unique' => 'El email se encuentra en uso',
+            'password.required' => 'El campo password es obligatorio',
+            'dni.unique' => 'El dni ya se encuentra registrado',
+        ];
+    }
 }
