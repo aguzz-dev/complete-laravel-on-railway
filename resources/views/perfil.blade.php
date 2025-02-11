@@ -18,7 +18,7 @@
         body {
             padding: 20px;
             min-height: 100vh;
-            background: linear-gradient(135deg, #1a2639 0%, #1f2937 100%);
+            background: #0f172a;
             color: #fff;
         }
 
@@ -76,7 +76,7 @@
         }
 
         .detail-section {
-            background-color: #0f172a;
+            background-color: #1b2637;
             border-radius: 0.5rem;
             padding: 1.5rem;
             margin-bottom: 1rem;

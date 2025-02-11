@@ -21,17 +21,32 @@
             padding: 20px;
         }
 
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: 100vh;
+            backdrop-filter: blur(10px);
+        }
         .dashboard {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 15px;
         }
 
         h1 {
+            position: relative;
             text-align: center;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
             margin-bottom: 30px;
-            color: #34d399;
-            font-size: 24px;
+        }
+
+        hr {
+            opacity: 0.1;
         }
 
         /* Cards Container */
@@ -316,10 +331,13 @@
     </style>
 </head>
 <body>
-<div class="dashboard">
+<div class="dashboard-container">
     @include('menu')
-    <h1>Vales activos hoy</h1>
-
+    <br>
+    <h1>Listado de<br>Vales de Hoy</h1>
+    <p class="subtitle"></p>
+    <hr>
+    <br>
     <div class="cards-container">
         <!-- Cards will be generated here -->
     </div>

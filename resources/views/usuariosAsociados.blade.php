@@ -19,20 +19,26 @@
             background-color: #0f172a;
             color: #ffffff;
             margin: 0;
-            padding: 20px;
+            padding: 20px!important;
         }
 
-        .table-container {
+        .dashboard-container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 15px;
+            min-height: 100vh;
+            backdrop-filter: blur(10px);
         }
 
         h1 {
+            position: relative;
             text-align: center;
+            margin-bottom: 10px;
+            font-size: 2rem!important;
+        }
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
             margin-bottom: 30px;
-            color: #34d399;
-            font-size: 24px;
         }
 
         /* Table Container */
@@ -179,6 +185,10 @@
             border-bottom: none;
         }
 
+        hr {
+            opacity: 0.1;
+        }
+
         .dtr-title {
             font-weight: bold;
             color: #34d399;
@@ -285,9 +295,13 @@
     </style>
 </head>
 <body>
-@include('menu')
-<h1>Usuarios de la unidad</h1>
-<div class="table-container">
+<div class="dashboard-container">
+    @include('menu')
+    <br>
+    <h1>Listado de<br>Usuarios de la Unidad</h1>
+    <p class="subtitle"></p>
+    <hr>
+    <br>
     <table id="users-table" class="display responsive nowrap" style="width:100%">
         <thead>
         <tr>
