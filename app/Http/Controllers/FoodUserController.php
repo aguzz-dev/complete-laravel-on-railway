@@ -22,6 +22,9 @@ class FoodUserController extends Controller
 
         $comidasByUsuario = [];
 
+        $fh = Carbon::now()->subHours(3);
+        $horaLimite = Carbon::today()->setTime(9, 30);
+
         foreach ($comidasSeleccionadasByUsuario as $comida) {
             $date = Carbon::parse($comida->pivot->date)->format('d-m');
             $comidasByUsuario[] = [
@@ -30,7 +33,7 @@ class FoodUserController extends Controller
                 'food_id' => $comida->id,
             ];
         }
-        return view('seleccionar', compact(['comidasByUsuario', 'comidasCreadasByUnidad']));
+        return view('seleccionar', compact(['comidasByUsuario', 'comidasCreadasByUnidad', 'fh', 'horaLimite']));
     }
 
     public function guardarRacionesSeleccionadas(Request $request)

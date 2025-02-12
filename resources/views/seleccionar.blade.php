@@ -71,6 +71,13 @@
             font-weight: 600;
         }
 
+        @if($fh > $horaLimite)
+        .cardDeHoy {
+            pointer-events: none;
+            opacity: 0.3;
+        }
+        @endif
+
         .date {
             color: #94a3b8;
         }
@@ -188,7 +195,6 @@
 <script>
     let comidas = @json($comidasCreadasByUnidad);
     let seleccionadas = @json($comidasByUsuario);
-
     $(document).ready(function() {
         function formatDate(date) {
             const day = String(date.getDate()).padStart(2, '0');
@@ -215,7 +221,7 @@
             console.log('Creando card para fecha:', formattedDate);
 
             let cardHtml = `
-                <div class="day-card ${isHidden ? 'hidden' : ''}" data-date="${formattedDate}">
+                <div class="day-card ${isToday ? 'cardDeHoy' : ''} ${isHidden ? 'hidden' : ''}" data-date="${formattedDate}">
                     <div class="day-header">
                         <span class="day-name">${capitalizeFirstLetter(dayName)}${isToday ? ' (hoy)' : ''}</span>
                         <span class="date">${formattedDate}</span>
