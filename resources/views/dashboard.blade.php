@@ -113,6 +113,7 @@
             white-space: nowrap;
         }
 
+        @if(auth()->user()->status === 'superadmin')
         .btn-editar {
             background-color: #34d399;
             color: #0f172a;
@@ -125,6 +126,13 @@
             font-size: 12px;
             white-space: nowrap;
         }
+
+        @else
+       .btn-editar {
+            display: none;
+        }
+        @endif
+
 
         /* DataTables Responsive */
         .dataTables_wrapper {

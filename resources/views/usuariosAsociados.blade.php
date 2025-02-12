@@ -93,10 +93,16 @@
             color: #0f172a;
         }
 
+        @if(auth()->user()->status === 'superadmin')
         .btn-eliminar {
             background-color: rgba(255, 0, 0, 0.89);
             color: #f8f8f8;
         }
+        @else
+        .btn-eliminar {
+            display: none;
+        }
+        @endif
 
         .btn-ver:hover {
             background-color: #10b981;
