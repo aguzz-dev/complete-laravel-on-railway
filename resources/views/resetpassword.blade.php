@@ -275,8 +275,8 @@
                 success: function(response) {
                     showAlert('Contraseña cambiada exitosamente.', 'success');
                     setTimeout(() => {
-                        window.location.href = '/login';
-                    }, 2000);
+                        window.location.href = '/';
+                    }, 700);
                 },
                 error: function(xhr) {
                     showAlert('Error al cambiar la contraseña. Inténtalo de nuevo.', 'error');

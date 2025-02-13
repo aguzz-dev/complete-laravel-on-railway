@@ -235,7 +235,9 @@
                 },
                 success: function(response) {
                     showAlert('codeAlert', 'Código verificado correctamente.', 'success');
-
+                    setTimeout(() => {
+                        window.location.href = '/resetpassword?email=' + encodeURIComponent(email) + '&code=' + encodeURIComponent(code)
+                    }, 300);
                     // Redirigir o realizar alguna acción adicional
                 },
                 error: function(xhr) {

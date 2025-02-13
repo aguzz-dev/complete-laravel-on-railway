@@ -16,7 +16,7 @@
         <a href="{{ route('seleccionar') }}">Selecciónar raciones</a>
         <a href="{{ route('misVales') }}">Mis vales</a>
         <a href="{{route('perfil')}}">Perfil</a>
-        <a style="color: #34d399;" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+        <a style="color: #34d399;" href="/" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
             Cerrar sesión
         </a>
     </nav>
