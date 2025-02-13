@@ -363,6 +363,16 @@
                     password: password,
                     unit_id: codigo
                 },
+                success: function(response) {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: 'Usuario registrado correctamente',
+                        icon: 'success',
+                        confirmButtonColor: '#34d399'
+                    }).then(() => {
+                        window.location.href = '{{route('login')}}';
+                    });
+                },
                 error: function(xhr, status, error) {
                     if (xhr.status === 422) {
                         let errors = xhr.responseJSON.errors;
