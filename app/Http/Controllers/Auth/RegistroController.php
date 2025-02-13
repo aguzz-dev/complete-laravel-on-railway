@@ -19,7 +19,7 @@ class RegistroController extends Controller
                 return view('registro', compact('code'));
             }
         }
-        return view('errors.404');
+        return view('welcome');
     }
 
     public function registro(RegistroRequest $request)

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\RegistroController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FoodUserController;
@@ -67,3 +68,13 @@ Route::group(['middleware' => 'auth'], function () {
 Route::post('/registro', [RegistroController::class, 'registro'])->name('registro-user');
 Route::post('/login', [LoginController::class, 'login'])->name('login-user');
 Route::post('/logout', [LogoutController::class, 'logout'])->name('logout-user');
+
+Route::get('recuperar-password', static function () {
+    return view('recovery');
+})->name('recuperar-password');
+
+Route::post('/recuperar-password-code', [PasswordController::class, 'sendCodeResetPassword'])->name('reset-password-code');
+Route::post('/verificar-password-code', [PasswordController::class, 'verificarCodeResetPassword'])->name('verificar-reset-password-code');
+Route::post('/resetear-password', [PasswordController::class, 'resetearPassword'])->name('resetear-password');
+
+Route::get('/resetpassword', [PasswordController::class, 'showResetPasswordForm'])->name('resetpassword');

@@ -59,7 +59,7 @@
 
 
         <div class="footer">
-            <a href="#">¿Olvidó su contraseña?</a>
+            <a href="{{ route('recuperar-password') }}">¿Olvidó su contraseña?</a>
         </div>
 
         <div class="security-notice">
