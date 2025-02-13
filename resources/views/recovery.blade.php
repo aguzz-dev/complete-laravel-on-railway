@@ -50,6 +50,10 @@
             stroke-width: 2;
         }
 
+        p {
+            color: #10b981;
+        }
+
         h1 {
             color: #fff;
             font-size: 1.5rem;
@@ -166,7 +170,8 @@
     </div>
 
     <div id="verificationSection">
-        <h2>Verificación de Código</h2>
+        <h2>¡Email enviado!</h2>
+        <p>Enviamos el código a su correo, ingréselo aquí abajo</p>
         <div id="codeAlert"></div>
         <div class="form-group">
             <label for="code">Código de Verificación</label>
