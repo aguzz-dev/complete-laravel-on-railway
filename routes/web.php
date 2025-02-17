@@ -61,6 +61,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/descargar-reportes', [ReportController::class, 'goToDescargarReportesView'])->name('descargarReportes');
 
     Route::post('/generar-pdf', [ReportController::class, 'generatePDF'])->name('generarPDF');
+    Route::post('/generar-pdf-hoy', [ReportController::class, 'generatePDFHoy'])->name('generarPDFHoy');
 
     Route::post('/usuario/rol', [PerfilController::class, 'CambiarRol']);
 });

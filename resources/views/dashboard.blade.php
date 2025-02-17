@@ -13,6 +13,33 @@
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background-color: #1e293b;
+            color: #ffffff;
+            border: 1px solid #34d399;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover {
+            background-color: #34d399;
+            color: #0f172a;
+        }
+
+        .filter-btn.active {
+            background-color: #34d399;
+            color: #0f172a;
+        }
         /* Base styles */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -343,21 +370,31 @@
 <div class="dashboard-container">
     @include('menu')
     <br>
-    <h1>Listado de<br>Vales de Hoy</h1>
-    <p class="subtitle"></p>
+    <h1>Listado de<br>Vales</h1>
     <hr>
+{{--    TODO Cambiar a semana completa cuando se implemente el control de vales--}}
+{{--    <p class="subtitle">Cantidad de vales de Hoy</p>--}}
     <br>
     <div class="cards-container">
         <!-- Cards will be generated here -->
     </div>
+{{--    <p class="subtitle">Vales de la semana completa</p>--}}
 
+    <div class="filter-buttons">
+        <button class="filter-btn active" data-filter="all">Todos</button>
+        <button class="filter-btn" data-filter="oficiales">Oficiales</button>
+        <button class="filter-btn" data-filter="suboficiales">Suboficiales</button>
+        <button class="filter-btn" data-filter="soldados">Soldados</button>
+    </div>
     <div class="table-container">
         <table id="users-table" class="display responsive nowrap" style="width:100%">
             <thead>
             <tr>
                 <th>Nombre y Apellido</th>
                 <!-- Meal columns will be generated dynamically -->
+                @if(auth()->user()->status === 'superadmin')
                 <th>Acciones</th>
+                @endif
             </tr>
             </thead>
             <tbody>
@@ -413,10 +450,42 @@
         }
     };
 
+    function formatDate(dateString) {
+        const days = ['Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'];
+        // const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+
+        const date = new Date(dateString);
+        const dayName = days[date.getDay()];
+        const day = date.getDate();
+        // const month = months[date.getMonth()];
+
+        return `${dayName} ${day}`;
+    }
+
     $(document).ready(function() {
         // Your provided data
         const comidas = @json($comidas);
         const usuarios = @json($usuarios);
+        let currentFilter = 'all';
+
+        // Custom filtering function
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+            if (currentFilter === 'all') return true;
+
+            const nombreCompleto = data[0];
+            const grado = nombreCompleto.split(' ')[0];
+
+            switch(currentFilter) {
+                case 'oficiales':
+                    return ['ST', 'TT', 'TP', 'CT', 'MY', 'TC', 'CR', 'CY', 'GB', 'GD', 'TG'].some(prefix => grado.startsWith(prefix));
+                case 'suboficiales':
+                    return ['CB', 'CI', 'SG', 'SI', 'SA', 'SP', 'SM'].some(prefix => grado.startsWith(prefix));
+                case 'soldados':
+                    return ['VS', 'VP'].some(prefix => grado.startsWith(prefix));
+                default:
+                    return true;
+            }
+        });
 
         // Generate cards
         const $cardsContainer = $('.cards-container');
@@ -440,11 +509,21 @@
             $thead.find('th:last').before(`<th>${comida.nombre}</th>`);
         });
 
+        // Add the date column before actions
+        $thead.find('th:last').before('<th>Fecha</th>');
+
+        // Store original dates for sorting
         const dataSet = usuarios.map(usuario => {
             const row = [usuario.nombre];
             Object.values(comidas).forEach(comida => {
                 const tieneComida = usuario[comida.nombre] ? '✅' : '❌';
                 row.push(tieneComida);
+            });
+            // Add both the formatted date for display and the original date for sorting
+            const originalDate = new Date(usuario.date);
+            row.push({
+                display: formatDate(usuario.date),
+                timestamp: originalDate.getTime()
             });
             row.push('<button class="btn-editar">Editar</button>');
             return row;
@@ -455,23 +534,33 @@
             data: dataSet,
             language: spanishLanguage,
             responsive: true,
+            order: [[dataSet[0].length - 2, 'asc']], // Sort by date column in descending order
             columns: [
                 { title: "Nombre y Apellido" },
                 ...Object.values(comidas).map(comida => ({
                     title: comida.nombre,
-                    className: 'all' // Makes this column always visible
+                    className: 'all'
                 })),
+                {
+                    title: "Fecha",
+                    className: 'all',
+                    render: function(data, type) {
+                        // Use the timestamp for sorting and the formatted date for display
+                        return type === 'sort' ? data.timestamp : data.display;
+                    }
+                },
+                @if(auth()->user()->status === 'superadmin')
                 {
                     title: "Acciones",
                     orderable: false,
                     searchable: false,
-                    className: 'all', // Makes this column always visible
+                    className: 'all',
                     render: function(data, type, row, meta) {
                         return `<button class="btn-editar" data-user-id="${usuarios[meta.row].id}">Editar</button>`;
                     }
                 }
+                @endif
             ],
-            // Responsive configuration
             responsive: {
                 details: {
                     display: $.fn.dataTable.Responsive.display.childRow,
@@ -482,7 +571,9 @@
                             if (columns[i].hidden) {
                                 html += '<li>' +
                                     '<span class="dtr-title">' + columns[i].title + '</span> ' +
-                                    '<span class="dtr-data">' + columns[i].data + '</span>' +
+                                    '<span class="dtr-data">' +
+                                    (columns[i].data && columns[i].data.display ? columns[i].data.display : columns[i].data) +
+                                    '</span>' +
                                     '</li>';
                             }
                         }
@@ -493,7 +584,14 @@
             }
         });
 
-        // Rest of your JavaScript remains the same
+        // Add filter button click handlers
+        $('.filter-btn').click(function() {
+            $('.filter-btn').removeClass('active');
+            $(this).addClass('active');
+            currentFilter = $(this).data('filter');
+            table.draw();
+        });
+
         function openModal(userId) {
             currentUserId = userId;
             $.get(`/dashboard/vales/${userId}`, function(data) {
@@ -521,6 +619,7 @@
             currentUserId = null;
         }
 
+        // Event handlers
         $(document).on('click', '.btn-editar', function() {
             const userId = $(this).data('user-id');
             openModal(userId);

@@ -10,6 +10,7 @@ class MisValesController extends Controller
     public function goToMisValesView()
     {
         $user = auth()->user();
+        $datosUsuario = $user->grado . ' ' . ucwords(strtolower($user->apellido)) . ' ' . ucwords(strtolower($user->nombre)) . ' - ' . $user->dni;
 
         $foodsDisponibles = Food::where('unit_id', '=', $user->unit_id)
             ->pluck('descripcion', 'id');
@@ -25,6 +26,6 @@ class MisValesController extends Controller
             ];
         })->toArray();
 
-        return view('misVales', compact('mealPlanData', 'foodsDisponibles'));
+        return view('misVales', compact('mealPlanData', 'foodsDisponibles', 'datosUsuario'));
     }
 }

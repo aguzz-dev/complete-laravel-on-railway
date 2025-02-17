@@ -15,7 +15,7 @@
     }
 
     body {
-        font-family: 'Segoe UI', system-ui, sans-serif;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         min-height: 100vh;
         background-color: #0f172a;
         color: #fff;
@@ -141,7 +141,7 @@
         <div class="header">
             <div class="date-display"></div>
             <h1 class="title">Mis Vales</h1>
-            <p class="subtitle"></p>
+            <p class="subtitle">{{ $datosUsuario }}</p>
         </div>
         <div id="meals-container">
             <!-- Cards will be inserted here -->

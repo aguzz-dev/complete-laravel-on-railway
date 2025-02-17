@@ -27,7 +27,7 @@ class DashboardController extends Controller
             ];
         }
 
-
+        //TODO Cambiar el = por un >= para ver todos los dias de la semana a partir de hoy, pero cuando este hecha la vista Control de Vales
         $comidasSeleccionadasByUsuario = FoodUser::where('date', '=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
             ->with(['user', 'food'])
             ->get();
@@ -39,7 +39,7 @@ class DashboardController extends Controller
                 'id' => $comida->user->id,
                 'date' => $comida->date,
                 'dni' => $comida->user->dni,
-                'nombre' => $comida->user->nombre . ' ' . $comida->user->apellido,
+                'nombre' => $comida->user->grado . ' ' . $comida->user->apellido . ' ' . $comida->user->nombre,
             ];
 
             foreach ($comidasCreadasByUnidad as $id => $descripcion) {

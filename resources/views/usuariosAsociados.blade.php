@@ -231,6 +231,34 @@
             background: #334155 !important;
         }
 
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background-color: #1e293b;
+            color: #ffffff;
+            border: 1px solid #34d399;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover {
+            background-color: #34d399;
+            color: #0f172a;
+        }
+
+        .filter-btn.active {
+            background-color: #34d399;
+            color: #0f172a;
+        }
+
         /* Media Queries */
         @media screen and (max-width: 640px) {
             body {
@@ -309,6 +337,13 @@
     <p class="subtitle"></p>
     <hr>
     <br>
+    <!-- Add filter buttons -->
+    <div class="filter-buttons">
+        <button class="filter-btn" data-filter="all">Todos</button>
+        <button class="filter-btn" data-filter="oficiales">Oficiales</button>
+        <button class="filter-btn" data-filter="suboficiales">Suboficiales</button>
+        <button class="filter-btn" data-filter="soldados">Soldados</button>
+    </div>
     <table id="users-table" class="display responsive nowrap" style="width:100%">
         <thead>
         <tr>
@@ -325,16 +360,33 @@
 <script>
     $(document).ready(function() {
         const users = @json($users);
+        let currentFilter = 'all';
 
+        // Custom filtering function
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+            if (currentFilter === 'all') return true;
+
+            const grado = data[0].split(' ')[0]; // Get the rank from the first column
+
+            switch(currentFilter) {
+                case 'oficiales':
+                    return ['ST', 'TT', 'TP', 'CT', 'MY', 'TC', 'CR', 'CY', 'GB', 'GD', 'TG'].some(prefix => grado.startsWith(prefix));
+                case 'suboficiales':
+                    return ['CB', 'CI', 'SG', 'SI', 'SA', 'SP', 'SM'].some(prefix => grado.startsWith(prefix));
+                case 'soldados':
+                    return ['VS', 'VP'].some(prefix => grado.startsWith(prefix));
+                default:
+                    return true;
+            }
+        });
         const table = $('#users-table').DataTable({
             data: users,
             columns: [
                 {
                     data: null,
-                    className: 'all', // Always visible
+                    className: 'all',
                     render: function(data) {
                         return `${data.grado} ${data.apellido} ${data.nombre}`;
-
                     }
                 },
                 {
@@ -354,7 +406,7 @@
                 },
                 {
                     data: null,
-                    className: 'all', // Always visible
+                    className: 'all',
                     orderable: false,
                     render: function(data) {
                         return `
@@ -394,6 +446,17 @@
             pageLength: 10,
             lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Todos"]]
         });
+
+        // Handle filter button clicks
+        $('.filter-btn').click(function() {
+            $('.filter-btn').removeClass('active');
+            $(this).addClass('active');
+            currentFilter = $(this).data('filter');
+            table.draw();
+        });
+
+        // Set "Todos" as active by default
+        $('.filter-btn[data-filter="all"]').addClass('active');
 
         // Handle window resize
         $(window).resize(function() {

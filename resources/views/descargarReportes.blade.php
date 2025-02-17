@@ -31,6 +31,9 @@
             font-size: 2.5em;
             font-weight: 700;
         }
+        hr {
+            opacity: 0.1;
+        }
 
         h1 {
             position: relative;
@@ -147,8 +150,12 @@
     <br>
     <h1>Reportes</h1>
     <p class="subtitle"></p>
+    <hr><br><br>
 
     <div class="select-container">
+        <label for="month-select" class="select-label">Descargar reporte de Hoy</label>
+        <button class="btn-generate" id="generate-report-hoy">Generar Reporte ({{ $reporteHoy }})</button>
+        <br><br><hr><br><br>
         <label for="month-select" class="select-label">Descargar reportes del mes de</label>
         <select id="month-select">
             <option value="">Seleccione un mes</option>
@@ -220,6 +227,52 @@
                 data: {
                     unit_id: unitId,
                     mes: formattedDate
+                },
+                xhrFields: {
+                    responseType: 'blob' // Indicar que la respuesta es un archivo binario
+                },
+                success: function(response) {
+                    // Crear un enlace temporal para descargar el PDF
+                    const url = window.URL.createObjectURL(response);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'reporte.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: 'Se ha descargado el reporte correctamente!',
+                        icon: 'success',
+                        confirmButtonColor: '#34d399'
+                    });
+                },
+                error: function() {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudo generar el reporte',
+                        icon: 'error',
+                        confirmButtonColor: '#34d399'
+                    });
+                }
+            });
+        });
+
+        // Handle report generation
+        $('#generate-report-hoy').click(function() {
+            const unitId = {{ auth()->user()->unit_id }};
+
+            $.ajax({
+                url: '/generar-pdf-hoy',
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: {
+                    unit_id: unitId,
+                    mes: @json($reporteHoy)
                 },
                 xhrFields: {
                     responseType: 'blob' // Indicar que la respuesta es un archivo binario
