@@ -27,8 +27,7 @@ class DashboardController extends Controller
             ];
         }
 
-        //TODO Cambiar el = por un >= para ver todos los dias de la semana a partir de hoy, pero cuando este hecha la vista Control de Vales
-        $comidasSeleccionadasByUsuario = FoodUser::where('date', '=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
+        $comidasSeleccionadasByUsuario = FoodUser::where('date', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
             ->with(['user', 'food'])
             ->get();
 
@@ -70,13 +69,34 @@ class DashboardController extends Controller
         $result = array_values($groupedData);
 
 
-        $fechaHoy = Carbon::today()->format('Y-m-d');
+        $fechaHoy = Carbon::today()->subHour(3)->format('Y-m-d');
 
         return view('dashboard', [
             'fechaHoy' => $fechaHoy,
             'comidas' => $comidasList,
             'usuarios' => $result
         ]);
+    }
 
+    public function filtroByDate($date)
+    {
+        $formattedDate = Carbon::parse($date)->format('Y-m-d') . ' 00:00:00';
+
+        $cantidadPorComida = FoodUser::where('date', '=', $formattedDate)
+            ->selectRaw('food_id, COUNT(*) as cantidad')
+            ->groupBy('food_id')
+            ->pluck('cantidad', 'food_id');
+
+        $comidasCreadasByUnidad = Food::where('unit_id', auth()->user()->unit_id)->pluck('descripcion', 'id');
+
+        $comidasList = [];
+        foreach ($comidasCreadasByUnidad as $id => $nombre) {
+            $comidasList[$id] = [
+                'nombre' => $nombre,
+                'cantidad' => $cantidadPorComida[$id] ?? 0,
+            ];
+        }
+//        dd($comidasList);
+        return $comidasList;
     }
 }

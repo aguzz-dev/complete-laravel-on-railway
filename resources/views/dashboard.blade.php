@@ -218,6 +218,32 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
+        .date-filter {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .date-input {
+            background-color: #1e293b;
+            color: #ffffff;
+            border: 1px solid #34d399;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .date-input:hover {
+            border-color: #10b981;
+        }
+
+        .date-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.2);
+        }
+
         .modal-header h2 {
             font-size: 1.2em;
         }
@@ -372,13 +398,17 @@
     <br>
     <h1>Listado de<br>Vales</h1>
     <hr>
-{{--    TODO Cambiar a semana completa cuando se implemente el control de vales--}}
-{{--    <p class="subtitle">Cantidad de vales de Hoy</p>--}}
     <br>
+
+    <!-- Agregar el contenedor para el filtro de fecha -->
+    <div class="date-filter-container" style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center;">
+        <input type="date" id="dateFilter" class="date-input" style="background-color: #1e293b; color: #ffffff; border: 1px solid #34d399; padding: 8px; border-radius: 6px;">
+        <button id="applyFilter" class="filter-btn" style="background-color: #34d399; color: #0f172a;">Aplicar Filtro</button>
+    </div>
+
     <div class="cards-container">
         <!-- Cards will be generated here -->
     </div>
-{{--    <p class="subtitle">Vales de la semana completa</p>--}}
 
     <div class="filter-buttons">
         <button class="filter-btn active" data-filter="all">Todos</button>
@@ -393,7 +423,7 @@
                 <th>Nombre y Apellido</th>
                 <!-- Meal columns will be generated dynamically -->
                 @if(auth()->user()->status === 'superadmin')
-                <th>Acciones</th>
+                    <th>Acciones</th>
                 @endif
             </tr>
             </thead>
@@ -404,7 +434,7 @@
     </div>
 </div>
 
-<!-- Modal remains the same -->
+<!-- Modal -->
 <div id="editModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -452,21 +482,67 @@
 
     function formatDate(dateString) {
         const days = ['Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'];
-        // const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
-
         const date = new Date(dateString);
         const dayName = days[date.getDay()];
         const day = date.getDate();
-        // const month = months[date.getMonth()];
-
         return `${dayName} ${day}`;
     }
 
     $(document).ready(function() {
-        // Your provided data
+        // Initialize variables
         const comidas = @json($comidas);
         const usuarios = @json($usuarios);
         let currentFilter = 'all';
+        let table;
+
+        // Function to update cards with filtered data
+        function updateCards(date) {
+            $.ajax({
+                url: `/dashboard/filtro/${date}`,
+                method: 'GET',
+                success: function(response) {
+                    const $cardsContainer = $('.cards-container');
+                    $cardsContainer.empty();
+
+                    // Manejar tanto el formato {comidas: [...]} como el array directo
+                    const comidasData = response.comidas || response;
+
+                    Object.entries(comidasData).forEach(([id, comida]) => {
+                        const cardHtml = `
+                            <div class="card">
+                                <h3>${comida.nombre}</h3>
+                                <p>Cantidad: ${comida.cantidad}</p>
+                            </div>
+                        `;
+                        $cardsContainer.append(cardHtml);
+                    });
+                },
+                error: function() {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudieron cargar los datos filtrados',
+                        icon: 'error',
+                        confirmButtonColor: '#34d399'
+                    });
+                }
+            });
+        }
+
+        // Generate initial cards with the data from the backend
+        if (comidas) {
+            const $cardsContainer = $('.cards-container');
+            $cardsContainer.empty();
+
+            Object.entries(comidas).forEach(([id, comida]) => {
+                const cardHtml = `
+                    <div class="card">
+                        <h3>${comida.nombre}</h3>
+                        <p>Cantidad: ${comida.cantidad}</p>
+                    </div>
+                `;
+                $cardsContainer.append(cardHtml);
+            });
+        }
 
         // Custom filtering function
         $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
@@ -487,111 +563,116 @@
             }
         });
 
-        // Generate cards
-        const $cardsContainer = $('.cards-container');
-        $cardsContainer.empty();
+        // Initialize table only if usuarios exists
+        if (usuarios && usuarios.length > 0) {
+            // Generate table columns
+            const $thead = $('#users-table thead tr');
+            $thead.find('th:not(:first-child):not(:last-child)').remove();
 
-        Object.values(comidas).forEach(comida => {
-            const cardHtml = `
-                <div class="card">
-                    <h3>${comida.nombre}</h3>
-                    <p>Cantidad: ${comida.cantidad}</p>
-                </div>
-            `;
-            $cardsContainer.append(cardHtml);
-        });
-
-        // Generate table columns
-        const $thead = $('#users-table thead tr');
-        $thead.find('th:not(:first-child):not(:last-child)').remove();
-
-        Object.values(comidas).forEach(comida => {
-            $thead.find('th:last').before(`<th>${comida.nombre}</th>`);
-        });
-
-        // Add the date column before actions
-        $thead.find('th:last').before('<th>Fecha</th>');
-
-        // Store original dates for sorting
-        const dataSet = usuarios.map(usuario => {
-            const row = [usuario.nombre];
             Object.values(comidas).forEach(comida => {
-                const tieneComida = usuario[comida.nombre] ? '✅' : '❌';
-                row.push(tieneComida);
+                $thead.find('th:last').before(`<th>${comida.nombre}</th>`);
             });
-            // Add both the formatted date for display and the original date for sorting
-            const originalDate = new Date(usuario.date);
-            row.push({
-                display: formatDate(usuario.date),
-                timestamp: originalDate.getTime()
-            });
-            row.push('<button class="btn-editar">Editar</button>');
-            return row;
-        });
 
-        // Initialize DataTable with responsive features
-        const table = $('#users-table').DataTable({
-            data: dataSet,
-            language: spanishLanguage,
-            responsive: true,
-            order: [[dataSet[0].length - 2, 'asc']], // Sort by date column in descending order
-            columns: [
-                { title: "Nombre y Apellido" },
-                ...Object.values(comidas).map(comida => ({
-                    title: comida.nombre,
-                    className: 'all'
-                })),
-                {
-                    title: "Fecha",
-                    className: 'all',
-                    render: function(data, type) {
-                        // Use the timestamp for sorting and the formatted date for display
-                        return type === 'sort' ? data.timestamp : data.display;
-                    }
-                },
-                @if(auth()->user()->status === 'superadmin')
-                {
-                    title: "Acciones",
-                    orderable: false,
-                    searchable: false,
-                    className: 'all',
-                    render: function(data, type, row, meta) {
-                        return `<button class="btn-editar" data-user-id="${usuarios[meta.row].id}">Editar</button>`;
-                    }
-                }
-                @endif
-            ],
-            responsive: {
-                details: {
-                    display: $.fn.dataTable.Responsive.display.childRow,
-                    type: 'inline',
-                    renderer: function(api, rowIdx, columns) {
-                        let html = '<ul class="dtr-details">';
-                        for (let i = 0; i < columns.length; i++) {
-                            if (columns[i].hidden) {
-                                html += '<li>' +
-                                    '<span class="dtr-title">' + columns[i].title + '</span> ' +
-                                    '<span class="dtr-data">' +
-                                    (columns[i].data && columns[i].data.display ? columns[i].data.display : columns[i].data) +
-                                    '</span>' +
-                                    '</li>';
-                            }
+            // Add the date column before actions
+            $thead.find('th:last').before('<th>Fecha</th>');
+
+            // Store original dates for sorting
+            const dataSet = usuarios.map(usuario => {
+                const row = [usuario.nombre];
+                Object.values(comidas).forEach(comida => {
+                    const tieneComida = usuario[comida.nombre] ? '✅' : '❌';
+                    row.push(tieneComida);
+                });
+                const originalDate = new Date(usuario.date);
+                row.push({
+                    display: formatDate(usuario.date),
+                    timestamp: originalDate.getTime()
+                });
+                row.push('<button class="btn-editar">Editar</button>');
+                return row;
+            });
+
+            // Initialize DataTable
+            table = $('#users-table').DataTable({
+                data: dataSet,
+                language: spanishLanguage,
+                responsive: true,
+                order: [[dataSet[0].length - 2, 'asc']],
+                columns: [
+                    { title: "Nombre y Apellido" },
+                    ...Object.values(comidas).map(comida => ({
+                        title: comida.nombre,
+                        className: 'all'
+                    })),
+                    {
+                        title: "Fecha",
+                        className: 'all',
+                        render: function(data, type) {
+                            return type === 'sort' ? data.timestamp : data.display;
                         }
-                        html += '</ul>';
-                        return html;
+                    },
+                        @if(auth()->user()->status === 'superadmin')
+                    {
+                        title: "Acciones",
+                        orderable: false,
+                        searchable: false,
+                        className: 'all',
+                        render: function(data, type, row, meta) {
+                            return `<button class="btn-editar" data-user-id="${usuarios[meta.row].id}">Editar</button>`;
+                        }
+                    }
+                    @endif
+                ],
+                responsive: {
+                    details: {
+                        display: $.fn.dataTable.Responsive.display.childRow,
+                        type: 'inline',
+                        renderer: function(api, rowIdx, columns) {
+                            let html = '<ul class="dtr-details">';
+                            for (let i = 0; i < columns.length; i++) {
+                                if (columns[i].hidden) {
+                                    html += '<li>' +
+                                        '<span class="dtr-title">' + columns[i].title + '</span> ' +
+                                        '<span class="dtr-data">' +
+                                        (columns[i].data && columns[i].data.display ? columns[i].data.display : columns[i].data) +
+                                        '</span>' +
+                                        '</li>';
+                                }
+                            }
+                            html += '</ul>';
+                            return html;
+                        }
                     }
                 }
+            });
+        }
+
+        // Handle apply filter button click
+        $('#applyFilter').click(function() {
+            const selectedDate = $('#dateFilter').val();
+            if (selectedDate) {
+                updateCards(selectedDate);
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Por favor seleccione una fecha',
+                    icon: 'warning',
+                    confirmButtonColor: '#34d399'
+                });
             }
         });
 
-        // Add filter button click handlers
+        // Filter button handlers
         $('.filter-btn').click(function() {
             $('.filter-btn').removeClass('active');
             $(this).addClass('active');
             currentFilter = $(this).data('filter');
-            table.draw();
+            if (table) {
+                table.draw();
+            }
         });
 
+        // Modal functions
         function openModal(userId) {
             currentUserId = userId;
             $.get(`/dashboard/vales/${userId}`, function(data) {
@@ -625,9 +706,7 @@
             openModal(userId);
         });
 
-        $('#cancelEdit').click(function() {
-            closeModal();
-        });
+        $('#cancelEdit').click(closeModal);
 
         $('#saveChanges').click(function() {
             if (!currentUserId) return;
@@ -675,7 +754,9 @@
 
         // Handle window resize
         $(window).resize(function() {
-            table.columns.adjust().responsive.recalc();
+            if (table) {
+                table.columns.adjust().responsive.recalc();
+            }
         });
     });
 </script>

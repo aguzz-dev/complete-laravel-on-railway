@@ -60,7 +60,7 @@
             color: #94a3b8;
         }
 
-        select {
+        select, input[type="date"] {
             width: 100%;
             max-width: 400px;
             padding: 12px 20px;
@@ -74,18 +74,21 @@
             appearance: none;
             -webkit-appearance: none;
             -moz-appearance: none;
+        }
+
+        select {
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2334d399' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 15px center;
             background-size: 16px;
         }
 
-        select:hover {
+        select:hover, input[type="date"]:hover {
             border-color: #10b981;
             box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.2);
         }
 
-        select:focus {
+        select:focus, input[type="date"]:focus {
             outline: none;
             border-color: #10b981;
             box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.3);
@@ -107,12 +110,18 @@
             transition: all 0.3s ease;
         }
 
-        .btn-generate:hover {
+        .btn-generate:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .btn-generate:not(:disabled):hover {
             background-color: #10b981;
             transform: translateY(-2px);
         }
 
-        .btn-generate:active {
+        .btn-generate:not(:disabled):active {
             transform: translateY(0);
         }
 
@@ -132,7 +141,7 @@
                 font-size: 1.1em;
             }
 
-            select {
+            select, input[type="date"] {
                 font-size: 1em;
                 padding: 10px 16px;
             }
@@ -156,6 +165,12 @@
         <label for="month-select" class="select-label">Descargar reporte de Hoy</label>
         <button class="btn-generate" id="generate-report-hoy">Generar Reporte ({{ $reporteHoy }})</button>
         <br><br><hr><br><br>
+
+        <label for="date-select" class="select-label">Descargar reporte por fecha</label>
+        <input type="date" id="date-select" class="date-input">
+        <button class="btn-generate" id="generate-report-fecha" disabled>Generar Reporte por Fecha</button>
+        <br><br><hr><br><br>
+
         <label for="month-select" class="select-label">Descargar reportes del mes de</label>
         <select id="month-select">
             <option value="">Seleccione un mes</option>
@@ -200,6 +215,90 @@
                 $select.append(`<option value="${yearMonth}">${monthName} ${year}</option>`);
             });
 
+        // Handle date selection
+        $('#date-select').on('change', function() {
+            const selectedDate = $(this).val();
+            $('#generate-report-fecha').prop('disabled', !selectedDate);
+
+            if (selectedDate) {
+                // Verificar si hay datos para esta fecha
+                $.ajax({
+                    url: `/verificar-datos/${selectedDate}`,
+                    method: 'GET',
+                    success: function(response) {
+                        if (!response.hasData) {
+                            Swal.fire({
+                                title: 'Información',
+                                text: 'No hay datos disponibles para esta fecha',
+                                icon: 'info',
+                                confirmButtonColor: '#34d399'
+                            });
+                            $('#generate-report-fecha').prop('disabled', true);
+                        }
+                    },
+                    error: function() {
+                        console.error('Error al verificar datos');
+                    }
+                });
+            }
+        });
+
+        // Handle report generation by date
+        $('#generate-report-fecha').click(function() {
+            const selectedDate = $('#date-select').val();
+            const unitId = {{ auth()->user()->unit_id }};
+
+            if (!selectedDate) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Por favor seleccione una fecha',
+                    icon: 'warning',
+                    confirmButtonColor: '#34d399'
+                });
+                return;
+            }
+
+            $.ajax({
+                url: '/generar-pdf-fecha',
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: {
+                    unit_id: unitId,
+                    fecha: selectedDate
+                },
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function(response) {
+                    const url = window.URL.createObjectURL(response);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `reporte-${selectedDate}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: 'Se ha descargado el reporte correctamente!',
+                        icon: 'success',
+                        confirmButtonColor: '#34d399'
+                    });
+                },
+                error: function() {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudo generar el reporte',
+                        icon: 'error',
+                        confirmButtonColor: '#34d399'
+                    });
+                }
+            });
+        });
+
         // Handle report generation
         $('#generate-report').click(function() {
             const selectedMonth = $('#month-select').val();
@@ -229,14 +328,13 @@
                     mes: formattedDate
                 },
                 xhrFields: {
-                    responseType: 'blob' // Indicar que la respuesta es un archivo binario
+                    responseType: 'blob'
                 },
                 success: function(response) {
-                    // Crear un enlace temporal para descargar el PDF
                     const url = window.URL.createObjectURL(response);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'reporte.pdf';
+                    a.download = `reporte-${formattedDate}.pdf`;
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
@@ -260,7 +358,7 @@
             });
         });
 
-        // Handle report generation
+        // Handle report generation for today
         $('#generate-report-hoy').click(function() {
             const unitId = {{ auth()->user()->unit_id }};
 
@@ -275,14 +373,13 @@
                     mes: @json($reporteHoy)
                 },
                 xhrFields: {
-                    responseType: 'blob' // Indicar que la respuesta es un archivo binario
+                    responseType: 'blob'
                 },
                 success: function(response) {
-                    // Crear un enlace temporal para descargar el PDF
                     const url = window.URL.createObjectURL(response);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'reporte.pdf';
+                    a.download = 'reporte-hoy.pdf';
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);

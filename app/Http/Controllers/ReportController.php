@@ -97,4 +97,42 @@ class ReportController extends Controller
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'attachment; filename="Reporte-ValesEA.pdf"');
     }
+
+    public function generatePDFFecha(Request $request)
+    {
+        $fecha = Carbon::parse($request->fecha)->format('Y-m-d ') . ' 00:00:00';
+        $unidad = $request->unit_id;
+
+        $tiposComida = Food::where('unit_id', $unidad)->pluck('descripcion', 'id');
+
+        // Get the meals grouped by user and food type
+        $comidasPorUsuario = FoodUser::where('date', $fecha)
+            ->with(['user', 'food'])
+            ->get()
+            ->groupBy(['user_id', 'food_id']);
+
+        $meals = [];
+
+        foreach ($comidasPorUsuario as $userId => $comidas) {
+            $usuario = $comidas->first()->first()->user;
+            $nombreUsuario = $usuario->grado . ' ' . $usuario->apellido . ' ' . $usuario->nombre;
+
+            $meals[$nombreUsuario] = [];
+
+            foreach ($comidas as $foodId => $comidasTipo) {
+                $tipoComida = $tiposComida[$foodId] ?? 'Otro'; // If the food type doesn't exist, assign 'Otro'
+                $meals[$nombreUsuario][$tipoComida] = $comidasTipo->count();
+            }
+        }
+
+        $fechaDeGeneracion = Carbon::now()->subHour(3)->format('d/m/Y H:i:s');
+
+        $nombreMesYear = Carbon::parse($request->fecha)->format('d/m/y');
+
+        $pdf = PDF::loadView('reportFecha', compact(['meals', 'fechaDeGeneracion', 'nombreMesYear']));
+
+        return response($pdf->output(), 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="Reporte-ValesEA.pdf"');
+    }
 }

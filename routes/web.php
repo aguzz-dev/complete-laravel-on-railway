@@ -10,6 +10,7 @@ use App\Http\Controllers\MisValesController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UsuariosAsociadosController;
+use App\Http\Controllers\ValesController;
 use App\Models\FoodUser;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Route;
@@ -53,17 +54,21 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/saveSeleccion', [FoodUserController::class, 'guardarRacionesSeleccionadas'])->name('saveSeleccion');
 
     Route::get('/dashboard/vales/{userId}', [FoodUserController::class, 'valesTodayByUser'])->name('valesTodayByUser');
-
+    Route::get('/dashboard/filtro/{date}', [DashboardController::class, 'filtroByDate'])->name('filtroByDate');
     Route::post('/dashboard/vales/editar', [FoodUserController::class, 'editValesByUser'])->name('valesTodayByUser');
 
     Route::delete('/usuario/{userId}', [UsuariosAsociadosController::class, 'destroy']);
 
     Route::get('/descargar-reportes', [ReportController::class, 'goToDescargarReportesView'])->name('descargarReportes');
-
     Route::post('/generar-pdf', [ReportController::class, 'generatePDF'])->name('generarPDF');
     Route::post('/generar-pdf-hoy', [ReportController::class, 'generatePDFHoy'])->name('generarPDFHoy');
+    Route::post('/generar-pdf-fecha', [ReportController::class, 'generatePDFFecha'])->name('generarPDFFecha');
 
     Route::post('/usuario/rol', [PerfilController::class, 'CambiarRol']);
+
+    Route::get('vales', [ValesController::class, 'goToValesView'])->name('vales');
+    Route::get('getVales', [ValesController::class, 'getVales'])->name('getVales');
+
 });
 
 Route::post('/registro', [RegistroController::class, 'registro'])->name('registro-user');
