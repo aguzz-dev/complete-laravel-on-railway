@@ -301,7 +301,7 @@
 
     <div class="select-container">
         <select id="valeSelect">
-            <option value="">Seleccione un vale</option>
+            <option value="">⬇️Seleccione un vale⬇️</option>
             @foreach($vales as $vale)
                 <option value="{{ $vale['id'] }}">{{ $vale['descripcion'] }}</option>
             @endforeach
