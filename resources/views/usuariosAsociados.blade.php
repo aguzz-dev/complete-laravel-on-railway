@@ -334,7 +334,7 @@
 <div class="dashboard-container">
     @include('menu')
     <br>
-    <h1>Listado de Usuarios</h1>
+    <h1>Listado de<br>Usuarios</h1>
     <p class="subtitle"></p>
     <hr>
     <br>

@@ -152,6 +152,9 @@
                 padding: 12px 24px;
                 font-size: 1em;
             }
+            #date-select{
+                width: 200px;
+            }
         }
     </style>
 </head>
@@ -168,7 +171,7 @@
         <button class="btn-generate" id="generate-report-hoy">Generar Reporte ({{ $reporteHoy }})</button>
         <br><br><hr><br><br>
 
-        <label for="date-select" class="select-label">Descargar reporte por fecha</label>
+        <label for="date-select" class="select-label">⬇️Descargar reporte por fecha⬇️</label>
         <input type="date" id="date-select" class="date-input">
         <button class="btn-generate" id="generate-report-fecha" disabled>Generar Reporte por Fecha</button>
         <br><br><hr><br><br>
