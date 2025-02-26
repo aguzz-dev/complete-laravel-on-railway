@@ -28,8 +28,12 @@ class DashboardController extends Controller
         }
 
         $comidasSeleccionadasByUsuario = FoodUser::where('date', '>=', Carbon::today()->subHour(3)->format('Y-m-d') . ' 00:00:00')
+            ->whereHas('user', function ($query) {
+                $query->where('unit_id', auth()->user()->unit_id);
+            })
             ->with(['user', 'food'])
             ->get();
+
 
         $comidasSeleccionadasByUsuarioFormatted = [];
 

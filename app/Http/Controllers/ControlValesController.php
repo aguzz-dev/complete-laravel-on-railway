@@ -10,7 +10,9 @@ class ControlValesController extends Controller
 {
     public function goToControlValesView()
     {
-        $vales = FoodUser::where('date', Carbon::now()->subHour(3)->format('Y-m-d') . ' 00:00:00')
+        $today = Carbon::now()->subHour(3)->format('Y-m-d') . ' 00:00:00';
+
+        $Allvales = FoodUser::where('date', $today)
             ->get()
             ->map(function ($vale) {
                 return [
@@ -21,6 +23,8 @@ class ControlValesController extends Controller
                 ];
             });
 
+        $vales = $Allvales->unique('id');
+
         return view('controlVales', compact('vales'));
     }
 
@@ -29,10 +33,12 @@ class ControlValesController extends Controller
         $hoy = Carbon::now()->subHour(3)->format('Y-m-d') . ' 00:00:00';
         $nombreVale = Food::where('id', $valeId)->value('descripcion');
 
-        $vales = FoodUser::where('user_id', auth()->id())
-            ->with('user')
-            ->where('food_id', $valeId)
+        $vales = FoodUser::where('food_id', $valeId)
             ->where('date', $hoy)
+            ->whereHas('user', function ($query) {
+                $query->where('unit_id', auth()->user()->unit_id);
+            })
+            ->with('user')
             ->get()
             ->map(function ($vale) use ($hoy, $nombreVale) {
                 return [
@@ -43,6 +49,7 @@ class ControlValesController extends Controller
                     'estado' => $vale->status,
                 ];
             });
+
 
         return response()->json($vales);
     }
