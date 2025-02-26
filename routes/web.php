@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\RegistroController;
+use App\Http\Controllers\ControlValesController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FoodUserController;
 use App\Http\Controllers\MisValesController;
@@ -54,6 +55,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/saveSeleccion', [FoodUserController::class, 'guardarRacionesSeleccionadas'])->name('saveSeleccion');
 
     Route::get('/dashboard/vales/{userId}', [FoodUserController::class, 'valesTodayByUser'])->name('valesTodayByUser');
+    Route::get('/dashboard/vales/editar/{userId}', [FoodUserController::class, 'valesTodayByDate'])->name('valesTodayByDate');
     Route::get('/dashboard/filtro/{date}', [DashboardController::class, 'filtroByDate'])->name('filtroByDate');
     Route::post('/dashboard/vales/editar', [FoodUserController::class, 'editValesByUser'])->name('valesTodayByUser');
 
@@ -66,8 +68,16 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::post('/usuario/rol', [PerfilController::class, 'CambiarRol']);
 
-    Route::get('vales', [ValesController::class, 'goToValesView'])->name('vales');
-    Route::get('getVales', [ValesController::class, 'getVales'])->name('getVales');
+    Route::get('/vales', [ValesController::class, 'goToValesView'])->name('vales');
+    Route::get('/getVales', [ValesController::class, 'getVales'])->name('getVales');
+    Route::post('/crearVale', [ValesController::class, 'crearVale'])->name('crearVale');
+    Route::post('/editarVale', [ValesController::class, 'editarVale'])->name('editarVale');
+    Route::post('/eliminarVale', [ValesController::class, 'eliminarVale'])->name('eliminarVale');
+
+    Route::get('/control-vales', [ControlValesController::class, 'goToControlValesView'])->name('controlVales');
+    Route::get('/getValesDiarios/{valeId}', [ControlValesController::class, 'getValesDiarios'])->name('getValesDiarios');
+    Route::post('/cambiarEstadoVale', [ControlValesController::class, 'cambiarEstadoVale'])->name('cambiarEstadoVale');
+
 
 });
 

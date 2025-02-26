@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://i.imgur.com/BLJohUm.png" type="image/x-icon">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>Gestión de Vales</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #1e293b;
+            background-color: #0f172a;
             color: #ffffff;
             min-height: 100vh;
         }
@@ -87,7 +89,7 @@
         }
 
         input {
-            width: 100%;
+            width: 92%;
             padding: 12px;
             border: 2px solid #34d399;
             border-radius: 6px;
@@ -110,7 +112,7 @@
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.3s ease;
-            padding: 10px 20px;
+            padding: 14px 20px;
         }
 
         .edit-button {
@@ -121,6 +123,11 @@
 
         .edit-button:hover {
             background-color: #3ee6a8;
+            transform: translateY(-1px);
+        }
+
+        .delete-button:hover {
+            background-color: #dc2626;
             transform: translateY(-1px);
         }
 
@@ -158,7 +165,6 @@
             background-color: #34d399;
             color: #1e293b;
             font-weight: bold;
-            text-transform: uppercase;
             letter-spacing: 1px;
         }
 
@@ -190,9 +196,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
             z-index: 1000;
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(2px);
         }
 
         .modal-content {
@@ -224,6 +229,7 @@
                 opacity: 1;
             }
         }
+
 
         .modal-buttons {
             display: flex;
@@ -268,11 +274,219 @@
         .new-row {
             animation: fadeIn 0.5s ease-out;
         }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .edit-button {
+            background-color: #34d399;
+            color: #1e293b;
+            font-size: 0.9em;
+            padding: 8px 16px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(52, 211, 153, 0.2);
+        }
+
+        .edit-button:hover {
+            background-color: #3ee6a8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(52, 211, 153, 0.3);
+        }
+
+        .edit-button:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(52, 211, 153, 0.2);
+        }
+
+        .delete-button {
+            background-color: #be2020;
+            color: white;
+            font-size: 0.9em;
+            padding: 8px 16px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(52, 211, 153, 0.2);
+        }
+
+        .delete-button:hover {
+            background-color: #ef4444;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(248, 113, 113, 0.3);
+        }
+
+        .delete-button:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(248, 113, 113, 0.2);
+        }
+
+        .create-button {
+            background-color: #34d399;
+            color: #1e293b;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(52, 211, 153, 0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .create-button:hover {
+            background-color: #3ee6a8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(52, 211, 153, 0.3);
+        }
+
+        .create-button:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(52, 211, 153, 0.2);
+        }
+
+        /* Update the table cell padding for better button alignment */
+        td {
+            padding: 12px 16px;
+            vertical-align: middle;
+        }
+
+        /* Add styles for the form submit button */
+        button[type="submit"] {
+            background-color: #34d399;
+            color: #1e293b;
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(52, 211, 153, 0.2);
+        }
+
+        button[type="submit"]:hover {
+            background-color: #3ee6a8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(52, 211, 153, 0.3);
+        }
+
+        button[type="submit"]:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(52, 211, 153, 0.2);
+        }
+
+        /* Update modal button styles */
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            font-size: 1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .save-button {
+            background-color: #34d399;
+            color: #1e293b;
+            box-shadow: 0 2px 4px rgba(52, 211, 153, 0.2);
+        }
+
+        .save-button:hover {
+            background-color: #3ee6a8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(52, 211, 153, 0.3);
+        }
+
+        .cancel-button {
+            background-color: #64748b;
+            color: #ffffff;
+            box-shadow: 0 2px 4px rgba(100, 116, 139, 0.2);
+        }
+
+        .cancel-button:hover {
+            background-color: #94a3b8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(100, 116, 139, 0.3);
+        }
+
+        /* Add disabled state styles */
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        h1 {
+            position: relative;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 30px;
+        }
+
+        hr {
+            opacity: 0.1;
+        }
+
+        @media only screen and (max-width: 480px) {
+            .modal-content{
+                width: auto;
+            }
+            .button-group{
+                display: flex;
+                flex-direction: column;
+            }
+
+            .delete-button {
+                font-size: 0.7em;
+                padding: 7px 7px;
+                border-radius: 6px;
+                display: inline-flex;
+                align-items: center;
+                margin-left: 0px;
+                gap: 1px;
+                transition: all 0.2s ease;
+                box-shadow: 0 2px 4px rgba(52, 211, 153, 0.2);
+            }
+
+            .edit-button {
+                font-size: 0.7em;
+                padding: 7px 7px;
+                border-radius: 6px;
+                display: inline-flex;
+                align-items: center;
+                gap: 1px;
+                transition: all 0.2s ease;
+                box-shadow: 0 2px 4px rgba(52, 211, 153, 0.2);
+            }
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>Gestión de Vales</h1>
+    @include('menu')
+    <br>
+    <h1>Vales<br>disponibles</h1>
+    <br>
+    <hr>
+    <br>
 
     <div class="button-container">
         <button class="create-button" id="showForm">Crear Vale</button>
@@ -413,16 +627,21 @@
 
                     comidas.forEach(function(comida) {
                         const row = $(`
-                                <tr class="new-row">
-                                    <td>${comida.descripcion}</td>
-                                    <td class="precio">${comida.precio ? '$' + comida.precio.toFixed(2) : '-'}</td>
-                                    <td>
+                            <tr class="new-row">
+                                <td>${comida.descripcion}</td>
+                                <td class="precio">${comida.precio ? '$' + comida.precio.toFixed(2) : '-'}</td>
+                                <td>
+                                    <div class="button-group">
                                         <button class="edit-button" onclick="editarVale(${comida.id}, '${comida.descripcion}', ${comida.precio})">
                                             Editar
                                         </button>
-                                    </td>
-                                </tr>
-                            `);
+                                        <button class="delete-button" onclick="eliminarVale(${comida.id})">
+                                            Borrar
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `);
                         tbody.append(row);
                     });
                 },
@@ -446,6 +665,48 @@
         $('#editForm')[0].reset();
     }
 
+    // Función para eliminar vale con SweetAlert2
+    function eliminarVale(id) {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "¡No podrás revertir esta acción!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#34d399',
+            cancelButtonColor: '#ef4444',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/eliminarVale',
+                    method: 'POST',
+                    data: {
+                        id: id,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        Swal.fire({
+                            title: '¡Eliminado!',
+                            text: 'El vale ha sido eliminado.',
+                            icon: 'success',
+                            confirmButtonColor: '#34d399'
+                        }).then(() => {
+                            window.location.reload(); // Recargar la página después de eliminar
+                        });
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Hubo un problema al eliminar el vale.',
+                            icon: 'error',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    }
+                });
+            }
+        });
+    }
     // Cerrar modal al hacer clic fuera de él
     window.onclick = function(event) {
         const modal = document.getElementById('editModal');

@@ -8,7 +8,11 @@
         <div class="menu-header">
             Menú
         </div>
+        @if(Auth::user()->status === 'superadmin')
+            <a href="{{ route('vales') }}">Crear vales</a>
+        @endif
         @if (in_array(Auth::user()->status, ['superadmin', 'admin']))
+            <a href="{{ route('controlVales') }}">Control de Vales</a>
             <a href="{{ route('dashboard') }}">Listado de Vales</a>
             <a href="{{ route('usuariosListado') }}">Listado de Usuarios</a>
             <a href="{{ route('descargarReportes') }}">Descargar Reportes</a>

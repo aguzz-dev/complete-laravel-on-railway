@@ -43,6 +43,8 @@
             text-align: center;
             margin-bottom: 10px;
             font-size: 2rem;
+            text-transform: uppercase;
+
         }
 
         .subtitle {

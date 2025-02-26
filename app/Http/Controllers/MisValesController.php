@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 use App\Models\Food;
+use App\Models\FoodUser;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -16,13 +17,14 @@ class MisValesController extends Controller
             ->pluck('descripcion', 'id');
 
         $mealPlans = $user->foods()
-            ->wherePivot('date', '>=', Carbon::today())
+            ->wherePivot('date', '>=', Carbon::now()->yesterday()) //TODO probar que onda esta poronga
             ->get();
 
         $mealPlanData = $mealPlans->map(function ($meal) {
             return [
                 'date' => Carbon::parse($meal->pivot->date)->format('d-m'),
                 'food_id' => $meal->id,
+                'status' => FoodUser::where('food_id', $meal->id)->where('date', $meal->pivot->date)->value('status')
             ];
         })->toArray();
 

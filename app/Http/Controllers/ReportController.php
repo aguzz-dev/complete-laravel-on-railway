@@ -25,10 +25,7 @@ class ReportController extends Controller
         $mes = $request->mes;
         $unidad = $request->unit_id;
 
-        // Get the types of food
         $tiposComida = Food::where('unit_id', $unidad)->pluck('descripcion', 'id');
-
-        // Get the meals grouped by user and food type
         $comidasPorUsuario = FoodUser::where('date', 'like', $mes . '%')
             ->with(['user', 'food'])
             ->get()
@@ -43,11 +40,14 @@ class ReportController extends Controller
             $meals[$nombreUsuario] = [];
 
             foreach ($comidas as $foodId => $comidasTipo) {
-                $tipoComida = $tiposComida[$foodId] ?? 'Otro'; // If the food type doesn't exist, assign 'Otro'
-                $meals[$nombreUsuario][$tipoComida] = $comidasTipo->count();
+                $tipoComida = $tiposComida[$foodId] ?? 'Otro'; // Si no existe el tipo de comida, asignar 'Otro'
+                $precioTotal = (float) ($comidasTipo->first()->food->precio ?? 0);
+                $meals[$nombreUsuario][$tipoComida] = [
+                    'cantidad' => $comidasTipo->count(),
+                    'precio_total' => $precioTotal * $comidasTipo->count() // Precio por cantidad
+                ];
             }
         }
-
         $fechaDeGeneracion = Carbon::now()->subHour(3)->format('d/m/Y H:i:s');
 
         $nombreMesYear = Carbon::now()->locale('es')->isoFormat('MMMM/YYYY');
@@ -64,10 +64,8 @@ class ReportController extends Controller
         $fechaHoy = Carbon::createFromFormat('d/m/Y', $request->mes)->format('Y-m-d ') . ' 00:00:00';
         $unidad = $request->unit_id;
 
-        // Get the types of food
         $tiposComida = Food::where('unit_id', $unidad)->pluck('descripcion', 'id');
 
-        // Get the meals grouped by user and food type
         $comidasPorUsuario = FoodUser::where('date', $fechaHoy)
             ->with(['user', 'food'])
             ->get()
@@ -82,13 +80,18 @@ class ReportController extends Controller
             $meals[$nombreUsuario] = [];
 
             foreach ($comidas as $foodId => $comidasTipo) {
-                $tipoComida = $tiposComida[$foodId] ?? 'Otro'; // If the food type doesn't exist, assign 'Otro'
-                $meals[$nombreUsuario][$tipoComida] = $comidasTipo->count();
+                $tipoComida = $tiposComida[$foodId] ?? 'Otro'; // Si no existe el tipo de comida, asignar 'Otro'
+
+                // Calcular el total del precio por cantidad
+                $precioTotal = (float) ($comidasTipo->first()->food->precio ?? 0);
+                $meals[$nombreUsuario][$tipoComida] = [
+                    'cantidad' => $comidasTipo->count(),
+                    'precio_total' => $precioTotal * $comidasTipo->count() // Precio por cantidad
+                ];
             }
         }
 
         $fechaDeGeneracion = Carbon::now()->subHour(3)->format('d/m/Y H:i:s');
-
         $nombreMesYear = Carbon::now()->subHour(3)->format('d/m/Y');
 
         $pdf = PDF::loadView('reportHoy', compact(['meals', 'fechaDeGeneracion', 'nombreMesYear']));
@@ -103,9 +106,10 @@ class ReportController extends Controller
         $fecha = Carbon::parse($request->fecha)->format('Y-m-d ') . ' 00:00:00';
         $unidad = $request->unit_id;
 
+        // Obtener los tipos de comida
         $tiposComida = Food::where('unit_id', $unidad)->pluck('descripcion', 'id');
 
-        // Get the meals grouped by user and food type
+        // Obtener las comidas agrupadas por usuario y tipo de comida
         $comidasPorUsuario = FoodUser::where('date', $fecha)
             ->with(['user', 'food'])
             ->get()
@@ -120,11 +124,16 @@ class ReportController extends Controller
             $meals[$nombreUsuario] = [];
 
             foreach ($comidas as $foodId => $comidasTipo) {
-                $tipoComida = $tiposComida[$foodId] ?? 'Otro'; // If the food type doesn't exist, assign 'Otro'
-                $meals[$nombreUsuario][$tipoComida] = $comidasTipo->count();
+                $tipoComida = $tiposComida[$foodId] ?? 'Otro'; // Si no existe el tipo de comida, asignar 'Otro'
+
+                // Calcular el total del precio por cantidad
+                $precioTotal = (float) ($comidasTipo->first()->food->precio ?? 0);
+                $meals[$nombreUsuario][$tipoComida] = [
+                    'cantidad' => $comidasTipo->count(),
+                    'precio_total' => $precioTotal * $comidasTipo->count() // Precio por cantidad
+                ];
             }
         }
-
         $fechaDeGeneracion = Carbon::now()->subHour(3)->format('d/m/Y H:i:s');
 
         $nombreMesYear = Carbon::parse($request->fecha)->format('d/m/y');

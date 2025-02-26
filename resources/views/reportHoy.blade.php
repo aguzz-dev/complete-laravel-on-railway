@@ -49,15 +49,23 @@
         <th>Desayuno</th>
         <th>Almuerzo</th>
         <th>Cena</th>
+        <th>Total $</th>  <!-- Nueva columna para el total en dinero -->
     </tr>
     </thead>
     <tbody>
     @foreach($meals as $user => $userMeals)
         <tr>
             <td class="user-name">{{ $user }}</td>
-            <td>{{ $userMeals['Desayno'] ?? 0 }}</td>
-            <td>{{ $userMeals['Almuerzo'] ?? 0 }}</td>
-            <td>{{ $userMeals['Cena'] ?? 0 }}</td>
+            <td>{{ $userMeals['Desayuno']['cantidad'] ?? 0 }}</td>
+            <td>{{ $userMeals['Almuerzo']['cantidad'] ?? 0 }}</td>
+            <td>{{ $userMeals['Cena']['cantidad'] ?? 0 }}</td>
+            <td>
+                ${{ number_format(
+                    (float) ($userMeals['Desayuno']['precio_total'] ?? 0) +
+                    (float) ($userMeals['Almuerzo']['precio_total'] ?? 0) +
+                    (float) ($userMeals['Cena']['precio_total'] ?? 0), 2)
+                 }}
+            </td> <!-- Total en dinero por usuario -->
         </tr>
     @endforeach
     </tbody>
@@ -66,19 +74,26 @@
         <th>Total</th>
         <td>
             {{ collect($meals)->sum(function($user) {
-                return $user['Desayno'] ?? 0;
+                return $user['Desayuno']['cantidad'] ?? 0;
             }) }}
         </td>
         <td>
             {{ collect($meals)->sum(function($user) {
-                return $user['Almuerzo'] ?? 0;
+                return $user['Almuerzo']['cantidad'] ?? 0;
             }) }}
         </td>
         <td>
             {{ collect($meals)->sum(function($user) {
-                return $user['Cena'] ?? 0;
+                return $user['Cena']['cantidad'] ?? 0;
             }) }}
         </td>
+        <td>
+            ${{ number_format(collect($meals)->sum(function($user) {
+                return ($user['Desayuno']['precio_total'] ?? 0) +
+                       ($user['Almuerzo']['precio_total'] ?? 0) +
+                       ($user['Cena']['precio_total'] ?? 0);
+            }), 2) }}
+        </td> <!-- Total en dinero de todas las comidas -->
     </tr>
     </tfoot>
 </table>

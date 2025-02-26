@@ -7,7 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class Food extends Model
 {
     protected $table = 'foods';
-    protected $fillable = ['id', 'name'];
+
+    protected $fillable = ['descripcion', 'precio', 'status', 'unit_id'];
+    public $timestamps = false; // Desactiva timestamps
+
 
     // Relación inversa con FoodUser
     public function foodUsers()

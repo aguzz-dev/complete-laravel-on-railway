@@ -30,6 +30,8 @@
             margin-bottom: 40px;
             font-size: 2.5em;
             font-weight: 700;
+            text-transform: uppercase;
+
         }
         hr {
             opacity: 0.1;

@@ -55,7 +55,6 @@ class FoodUserController extends Controller
     {
         $comidasCreadasByUnidad = Food::where('unit_id', auth()->user()->unit_id)->pluck('descripcion', 'id');
 
-
         $comidasHoy = FoodUser::where('user_id', $userId)
             ->whereDate('date', Carbon::today())
             ->get();
@@ -70,10 +69,30 @@ class FoodUserController extends Controller
         return response()->json($comidasFinales);
     }
 
+    public function valesTodayByDate($userId, Request $request)
+    {
+        $fechaRegistro = $request->date;
+        $comidasCreadasByUnidad = Food::where('unit_id', auth()->user()->unit_id)->pluck('descripcion', 'id');
+
+        $comidasHoy = FoodUser::where('user_id', $userId)
+            ->where('date', $fechaRegistro)
+            ->get();
+
+        $resultado = $comidasHoy->mapWithKeys(function ($foodUser) use ($comidasCreadasByUnidad) {
+            $descripcion = $comidasCreadasByUnidad[$foodUser->food_id] ?? 'Desconocido';
+            return [$descripcion => 'true'];
+        })->toArray();
+
+        $comidasFinales = $comidasCreadasByUnidad->mapWithKeys(fn($desc) => [$desc => 'false'])->merge($resultado);
+
+        return response()->json($comidasFinales);
+    }
+
     public function editValesByUser(Request $request)
     {
+        $fechaRegistro = $request->date;
         // Eliminar vales previos del usuario para hoy
-        FoodUser::where('date', Carbon::today()->format('Y-m-d') . ' 00:00:00')
+        FoodUser::where('date', $fechaRegistro)
             ->where('user_id', $request->userId)
             ->delete();
 
@@ -84,7 +103,7 @@ class FoodUserController extends Controller
         foreach ($request->selections as $comida => $seleccion) {
             if ($seleccion === "true" && isset($comidasCreadasByUnidad[$comida])) {
                 FoodUser::create([
-                    'date' => Carbon::today()->format('Y-m-d') . ' 00:00:00',
+                    'date' => $fechaRegistro,
                     'user_id' => $request->userId,
                     'food_id' => $comidasCreadasByUnidad[$comida], // Asociar el ID correcto
                 ]);

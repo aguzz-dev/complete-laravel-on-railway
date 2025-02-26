@@ -35,6 +35,7 @@
             text-align: center;
             margin-bottom: 10px;
             font-size: 2rem!important;
+            text-transform: uppercase;
         }
         .subtitle {
             text-align: center;
@@ -333,7 +334,7 @@
 <div class="dashboard-container">
     @include('menu')
     <br>
-    <h1>Listado de<br>Usuarios de la Unidad</h1>
+    <h1>Listado de Usuarios</h1>
     <p class="subtitle"></p>
     <hr>
     <br>

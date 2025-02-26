@@ -12,7 +12,7 @@ class DashboardController extends Controller
     public function goToDashboardView()
     {
 
-        $cantidadPorComida = FoodUser::where('date', '=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
+        $cantidadPorComida = FoodUser::where('date', '=', Carbon::today()->subHour(3)->format('Y-m-d') . ' 00:00:00')
             ->selectRaw('food_id, COUNT(*) as cantidad')
             ->groupBy('food_id')
             ->pluck('cantidad', 'food_id');
@@ -27,7 +27,7 @@ class DashboardController extends Controller
             ];
         }
 
-        $comidasSeleccionadasByUsuario = FoodUser::where('date', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
+        $comidasSeleccionadasByUsuario = FoodUser::where('date', '>=', Carbon::today()->subHour(3)->format('Y-m-d') . ' 00:00:00')
             ->with(['user', 'food'])
             ->get();
 
@@ -39,6 +39,8 @@ class DashboardController extends Controller
                 'date' => $comida->date,
                 'dni' => $comida->user->dni,
                 'nombre' => $comida->user->grado . ' ' . $comida->user->apellido . ' ' . $comida->user->nombre,
+                'estado' => FoodUser::where('id', $comida->id)->pluck('status')[0],
+                'comida_usada' => Food::where('id', $comida->food->id)->pluck('descripcion')[0]
             ];
 
             foreach ($comidasCreadasByUnidad as $id => $descripcion) {
@@ -48,6 +50,7 @@ class DashboardController extends Controller
 
             $comidasSeleccionadasByUsuarioFormatted[] = $comidaArray;
         }
+
 
         $groupedData = [];
 

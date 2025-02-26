@@ -396,19 +396,28 @@
 <div class="dashboard-container">
     @include('menu')
     <br>
-    <h1>Listado de<br>Vales</h1>
+    <h1>LISTADO<br>DE VALES</h1>
+    <br>
     <hr>
     <br>
 
     <!-- Agregar el contenedor para el filtro de fecha -->
-    <div class="date-filter-container" style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center;">
-        <input type="date" id="dateFilter" class="date-input" style="background-color: #1e293b; color: #ffffff; border: 1px solid #34d399; padding: 8px; border-radius: 6px;">
-        <button id="applyFilter" class="filter-btn" style="background-color: #34d399; color: #0f172a;">Aplicar Filtro</button>
+    <div class="date-filter-container" style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center; justify-content: space-evenly">
+        <div>
+            <input type="date" id="dateFilter" class="date-input" style="background-color: #1e293b; color: #ffffff; border: 1px solid #34d399; padding: 8px; border-radius: 6px; margin: 1px;">
+            <button id="applyFilter" class="filter-btn" style="background-color: #34d399; color: #0f172a; margin: 1px;">Aplicar Filtro</button>
+        </div>
+        <div style="text-align: center">
+            <span id="contador-fecha" style="float: right">Contadores de Vales del día de Hoy</span>
+        </div>
     </div>
 
     <div class="cards-container">
         <!-- Cards will be generated here -->
     </div>
+
+    <hr>
+    <br>
 
     <div class="filter-buttons">
         <button class="filter-btn active" data-filter="all">Todos</button>
@@ -578,20 +587,29 @@
 
             // Store original dates for sorting
             const dataSet = usuarios.map(usuario => {
-                const row = [usuario.nombre];
+                const row = [usuario.nombre]; // Agrega el nombre del usuario a la fila
+
                 Object.values(comidas).forEach(comida => {
-                    const tieneComida = usuario[comida.nombre] ? '✅' : '❌';
-                    row.push(tieneComida);
+                    let tieneComida = usuario[comida.nombre] ? '✅' : '❌'; // Verifica si el usuario tiene la comida
+                    console.log(usuario.estado);
+                    // Si el estado es 'usado' y esta es la comida usada, muestra el plato
+                    if (usuario.estado === 'usado' && usuario.comida_usada === comida.nombre) {
+                        tieneComida = '🍽️';
+                    }
+
+                    row.push(tieneComida); // Agrega el estado de la comida a la fila
                 });
+
+                // Formatea la fecha y agrega un botón de editar
                 const originalDate = new Date(usuario.date);
                 row.push({
                     display: formatDate(usuario.date),
                     timestamp: originalDate.getTime()
                 });
                 row.push('<button class="btn-editar">Editar</button>');
-                return row;
-            });
 
+                return row; // Retorna la fila completa
+            });
             // Initialize DataTable
             table = $('#users-table').DataTable({
                 data: dataSet,
@@ -618,7 +636,7 @@
                         searchable: false,
                         className: 'all',
                         render: function(data, type, row, meta) {
-                            return `<button class="btn-editar" data-user-id="${usuarios[meta.row].id}">Editar</button>`;
+                            return `<button class="btn-editar"  data-date="${usuarios[meta.row].date}" data-user-id="${usuarios[meta.row].id}">Editar</button>`;
                         }
                     }
                     @endif
@@ -652,6 +670,11 @@
             const selectedDate = $('#dateFilter').val();
             if (selectedDate) {
                 updateCards(selectedDate);
+
+                // Formatear la fecha de "YYYY-MM-DD" a "DD/MM/YYYY"
+                const formattedDate = selectedDate.split('-').reverse().join('/');
+
+                $("#contador-fecha").html('Contadores de Vales del ' + formattedDate);
             } else {
                 Swal.fire({
                     title: 'Error',
@@ -675,7 +698,7 @@
         // Modal functions
         function openModal(userId) {
             currentUserId = userId;
-            $.get(`/dashboard/vales/${userId}`, function(data) {
+            $.get(`/dashboard/vales/editar/${userId}?date=${selectedDate}`, function(data) {
                 const modalBody = $('.modal-body');
                 modalBody.empty();
 
@@ -699,14 +722,17 @@
             $('#editModal').hide();
             currentUserId = null;
         }
-
+        let selectedDate = null
         // Event handlers
         $(document).on('click', '.btn-editar', function() {
             const userId = $(this).data('user-id');
+            selectedDate = $(this).data('date');
             openModal(userId);
         });
 
-        $('#cancelEdit').click(closeModal);
+        $('#cancelEdit').click(function() {
+            closeModal();
+        });
 
         $('#saveChanges').click(function() {
             if (!currentUserId) return;
@@ -721,6 +747,7 @@
                 method: 'POST',
                 data: {
                     _token: $('meta[name="csrf-token"]').attr('content'),
+                    date: selectedDate, // Usa la variable global
                     userId: currentUserId,
                     selections: selections
                 },
@@ -735,16 +762,18 @@
                         window.location.reload();
                     });
                 },
-                error: function() {
+                error: function(xhr) {
+                    let errorMessage = xhr.responseJSON?.message || 'No se pudieron guardar los cambios';
                     Swal.fire({
                         title: 'Error',
-                        text: 'No se pudieron guardar los cambios',
+                        text: errorMessage,
                         icon: 'error',
                         confirmButtonColor: '#34d399'
                     });
                 }
             });
         });
+
 
         $(window).click(function(event) {
             if ($(event.target).is('#editModal')) {
