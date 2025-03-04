@@ -491,7 +491,7 @@
     };
 
     function formatDate(dateString) {
-        const days = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'];
+        const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
         const date = new Date(dateString);
         const dayName = days[date.getDay()];
         const day = date.getDate();

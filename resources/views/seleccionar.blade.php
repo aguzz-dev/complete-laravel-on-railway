@@ -217,7 +217,7 @@
 
         function createDayCard(date, isHidden = false) {
             const formattedDate = formatDate(date);
-            const dayNames = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']; // Array con los días
+            const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']; // Array con los días
             const dayName = dayNames[date.getDay()]; // Usamos getDay() para obtener el índice correcto
             const isToday = new Date().getDay() === date.getDay();
 

@@ -182,7 +182,7 @@
         function formatDate(dateStr) {
             const [day, month] = dateStr.split('-').map(Number);
             const date = new Date(2024, month - 1, day);
-            const dayNames = ['Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Lunes'];
+            const dayNames = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
             return `${dayNames[date.getDay()]} ${day}/${month}`;
         }
 
