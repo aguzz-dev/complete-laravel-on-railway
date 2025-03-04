@@ -17,7 +17,7 @@ class MisValesController extends Controller
             ->pluck('descripcion', 'id');
 
         $mealPlans = $user->foods()
-            ->wherePivot('date', '>=', Carbon::now()->yesterday()) //TODO probar que onda esta poronga
+            ->wherePivot('date', '>=', Carbon::now()->subHour(3)->setTime(0, 0)->format('Y-m-d H:i:s'))
             ->get();
 
         $mealPlanData = $mealPlans->map(function ($meal) {

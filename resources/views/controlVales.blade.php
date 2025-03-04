@@ -288,6 +288,12 @@
         .new-row {
             animation: fadeIn 0.5s ease-out;
         }
+
+        @media (max-width: 768px) {
+            select {
+                width: 70%;
+            }
+        }
     </style>
 </head>
 <body>

@@ -5,81 +5,87 @@ namespace App\Http\Controllers;
 use App\Models\Food;
 use App\Models\FoodUser;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function goToDashboardView()
     {
+        $fechaHoy = Carbon::now()->subHour(3)->format('Y-m-d') . ' 00:00:00';
 
-        $cantidadPorComida = FoodUser::where('date', '=', Carbon::today()->subHour(3)->format('Y-m-d') . ' 00:00:00')
+        // Obtener la cantidad de cada comida seleccionada
+        $cantidadPorComida = FoodUser::where('date', '=', $fechaHoy)
             ->selectRaw('food_id, COUNT(*) as cantidad')
             ->groupBy('food_id')
             ->pluck('cantidad', 'food_id');
 
-        $comidasCreadasByUnidad = Food::where('unit_id', auth()->user()->unit_id)->pluck('descripcion', 'id');
+        // Obtener las comidas creadas por la unidad del usuario autenticado
+        $comidasCreadasByUnidad = Food::where('unit_id', auth()->user()->unit_id)
+            ->pluck('descripcion', 'id');
 
+        // Estructura de comidas con cantidad
         $comidasList = [];
         foreach ($comidasCreadasByUnidad as $id => $nombre) {
             $comidasList[$id] = [
                 'nombre' => $nombre,
-                'cantidad' => $cantidadPorComida[$id] ?? 0, // Si no existe en $cantidadPorComida, se pone 0
+                'cantidad' => $cantidadPorComida[$id] ?? 0, // Si no existe, se pone 0
             ];
         }
 
-        $comidasSeleccionadasByUsuario = FoodUser::where('date', '>=', Carbon::today()->subHour(3)->format('Y-m-d') . ' 00:00:00')
+        // Obtener las comidas seleccionadas por usuario
+        $comidasSeleccionadasByUsuario = FoodUser::where('date', '>=', $fechaHoy)
             ->whereHas('user', function ($query) {
                 $query->where('unit_id', auth()->user()->unit_id);
             })
             ->with(['user', 'food'])
             ->get();
 
-
         $comidasSeleccionadasByUsuarioFormatted = [];
 
         foreach ($comidasSeleccionadasByUsuario as $comida) {
-            $comidaArray = [
-                'id' => $comida->user->id,
-                'date' => $comida->date,
-                'dni' => $comida->user->dni,
-                'nombre' => $comida->user->grado . ' ' . $comida->user->apellido . ' ' . $comida->user->nombre,
-                'estado' => FoodUser::where('id', $comida->id)->pluck('status')[0],
-                'comida_usada' => Food::where('id', $comida->food->id)->pluck('descripcion')[0]
-            ];
+            $userId = $comida->user->id;
+            $userKey = $comida->date . '-' . $comida->user->dni;
 
-            foreach ($comidasCreadasByUnidad as $id => $descripcion) {
-                // Si el usuario seleccionó esta comida, marcamos true, de lo contrario false
-                $comidaArray[$descripcion] = $comida->food->id == $id;
+            if (!isset($comidasSeleccionadasByUsuarioFormatted[$userKey])) {
+                $comidasSeleccionadasByUsuarioFormatted[$userKey] = [
+                    'id' => $userId,
+                    'date' => $comida->date,
+                    'dni' => $comida->user->dni,
+                    'nombre' => $comida->user->grado . ' ' . $comida->user->apellido . ' ' . $comida->user->nombre,
+                    'estado' => 'pendiente', // Valor por defecto
+                    'comida_usada' => [],   // Inicializamos como array
+                ];
             }
 
-            $comidasSeleccionadasByUsuarioFormatted[] = $comidaArray;
-        }
+            // Marcar estado como "usado" si alguna comida tiene ese estado
+            $estadoActual = FoodUser::where('user_id', $userId)
+                ->where('date', $comida->date)
+                ->where('status', 'usado')
+                ->exists();
 
+            if ($estadoActual) {
+                $comidasSeleccionadasByUsuarioFormatted[$userKey]['estado'] = 'usado';
+            }
 
-        $groupedData = [];
-
-        foreach ($comidasSeleccionadasByUsuarioFormatted as $entry) {
-            $key = $entry['date'] . '-' . $entry['dni'];
-
-            if (!isset($groupedData[$key])) {
-                $groupedData[$key] = $entry;
-            } else {
-                // Iterar dinámicamente sobre las claves de comidas
-                foreach ($comidasCreadasByUnidad as $comida) {
-                    if (isset($entry[$comida])) {
-                        $groupedData[$key][$comida] |= $entry[$comida];
-                    }
+            // Agregar comida usada si su estado es "usado"
+            if ($comida->status === 'usado') {
+                $comidaDescripcion = $comida->food->descripcion;
+                if (!in_array($comidaDescripcion, $comidasSeleccionadasByUsuarioFormatted[$userKey]['comida_usada'])) {
+                    $comidasSeleccionadasByUsuarioFormatted[$userKey]['comida_usada'][] = $comidaDescripcion;
                 }
             }
+
+            // Registrar si el usuario seleccionó esta comida
+            foreach ($comidasCreadasByUnidad as $id => $descripcion) {
+                $comidasSeleccionadasByUsuarioFormatted[$userKey][$descripcion] =
+                    $comida->food->id == $id || ($comidasSeleccionadasByUsuarioFormatted[$userKey][$descripcion] ?? false);
+            }
         }
 
-        $result = array_values($groupedData);
-
-
-        $fechaHoy = Carbon::today()->subHour(3)->format('Y-m-d');
+        // Convertimos los valores en un array indexado
+        $result = array_values($comidasSeleccionadasByUsuarioFormatted);
 
         return view('dashboard', [
-            'fechaHoy' => $fechaHoy,
+            'fechaHoy' => Carbon::now()->subHour(3)->format('Y-m-d'),
             'comidas' => $comidasList,
             'usuarios' => $result
         ]);
@@ -94,7 +100,8 @@ class DashboardController extends Controller
             ->groupBy('food_id')
             ->pluck('cantidad', 'food_id');
 
-        $comidasCreadasByUnidad = Food::where('unit_id', auth()->user()->unit_id)->pluck('descripcion', 'id');
+        $comidasCreadasByUnidad = Food::where('unit_id', auth()->user()->unit_id)
+            ->pluck('descripcion', 'id');
 
         $comidasList = [];
         foreach ($comidasCreadasByUnidad as $id => $nombre) {
@@ -103,7 +110,7 @@ class DashboardController extends Controller
                 'cantidad' => $cantidadPorComida[$id] ?? 0,
             ];
         }
-//        dd($comidasList);
+
         return $comidasList;
     }
 }

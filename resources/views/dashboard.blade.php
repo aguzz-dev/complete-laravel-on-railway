@@ -209,6 +209,7 @@
         /* Modal Styles */
         .modal-content {
             position: relative;
+            top: -50px;
             background-color: #1e293b;
             margin: 14% auto;
             padding: 20px;
@@ -490,7 +491,7 @@
     };
 
     function formatDate(dateString) {
-        const days = ['Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'];
+        const days = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'];
         const date = new Date(dateString);
         const dayName = days[date.getDay()];
         const day = date.getDate();
@@ -579,7 +580,7 @@
             $thead.find('th:not(:first-child):not(:last-child)').remove();
 
             Object.values(comidas).forEach(comida => {
-                $thead.find('th:last').before(`<th>${comida.nombre}</th>`);
+                $thead.find('th:last').before(`<th>${comida.nombre}</th>`);  // Añadir las columnas de comidas
             });
 
             // Add the date column before actions
@@ -589,12 +590,13 @@
             const dataSet = usuarios.map(usuario => {
                 const row = [usuario.nombre]; // Agrega el nombre del usuario a la fila
 
+                // Recorrer las comidas y verificar si cada una fue usada por el usuario
                 Object.values(comidas).forEach(comida => {
                     let tieneComida = usuario[comida.nombre] ? '✅' : '❌'; // Verifica si el usuario tiene la comida
-                    console.log(usuario.estado);
-                    // Si el estado es 'usado' y esta es la comida usada, muestra el plato
-                    if (usuario.estado === 'usado' && usuario.comida_usada === comida.nombre) {
-                        tieneComida = '🍽️';
+
+                    // Verifica si la comida está en el array de comidas usadas para ese usuario
+                    if (usuario.estado == 'usado' && usuario.comida_usada.includes(comida.nombre)) {
+                        tieneComida = '🍽️';  // Mostrar el plato si la comida está en las comidas usadas
                     }
 
                     row.push(tieneComida); // Agrega el estado de la comida a la fila
@@ -606,7 +608,7 @@
                     display: formatDate(usuario.date),
                     timestamp: originalDate.getTime()
                 });
-                row.push('<button class="btn-editar">Editar</button>');
+                row.push('<button class="btn-editar">Editar</button>');  // Botón de editar
 
                 return row; // Retorna la fila completa
             });

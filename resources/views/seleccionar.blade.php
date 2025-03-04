@@ -217,10 +217,9 @@
 
         function createDayCard(date, isHidden = false) {
             const formattedDate = formatDate(date);
-            const dayName = date.toLocaleDateString('es-ES', { weekday: 'long' });
-            const isToday = new Date().toDateString() === date.toDateString();
-
-            console.log('Creando card para fecha:', formattedDate);
+            const dayNames = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']; // Array con los días
+            const dayName = dayNames[date.getDay()]; // Usamos getDay() para obtener el índice correcto
+            const isToday = new Date().getDay() === date.getDay();
 
             let cardHtml = `
                 <div class="day-card ${isToday ? 'cardDeHoy' : ''} ${isHidden ? 'hidden' : ''}" data-date="${formattedDate}">
@@ -270,6 +269,10 @@
         }
 
         function submitMealPlan() {
+
+            // Deshabilitar el botón "Guardar selección" para evitar múltiples envíos
+            $('#submitMeals').prop('disabled', true).text('Guardando...');
+
             const today = new Date();
             const mealPlan = [];
 
@@ -293,7 +296,6 @@
                     }
                 });
             });
-
 
             $.ajax({
                 url: '{{ route("saveSeleccion") }}',
@@ -322,6 +324,10 @@
                         confirmButtonColor: '#34d399'
                     });
                     console.error('Error:', xhr.responseText);
+                },
+                complete: function() {
+                    // Habilitar el botón nuevamente después de la respuesta (éxito o error)
+                    $('#submitMeals').prop('disabled', false).text('Guardar selección');
                 }
             });
         }
@@ -333,13 +339,6 @@
             const meal = $(this).data('meal');
             const mealId = $(this).data('meal-id');
             const isChecked = $(this).prop('checked');
-
-            console.log('Cambio en selección:', {
-                date,
-                meal,
-                mealId,
-                isChecked
-            });
         });
 
         let weekVisible = false;

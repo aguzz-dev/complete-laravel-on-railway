@@ -23,7 +23,7 @@ class FoodUserController extends Controller
         $comidasByUsuario = [];
 
         $fh = Carbon::now()->subHours(3);
-        $horaLimite = Carbon::today()->setTime(9, 30);
+        $horaLimite = Carbon::now()->subHours(3)->setTime(9, 30);
 
         foreach ($comidasSeleccionadasByUsuario as $comida) {
             $date = Carbon::parse($comida->pivot->date)->format('d-m');
