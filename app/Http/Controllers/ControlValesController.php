@@ -12,16 +12,20 @@ class ControlValesController extends Controller
     {
         $today = Carbon::now()->subHour(3)->format('Y-m-d') . ' 00:00:00';
 
+        $foodsByUnidad = Food::where('unit_id', auth()->user()->unit_id)->pluck('id')->toArray(); // Obtienes los IDs de los alimentos por unidad
+
         $Allvales = FoodUser::where('date', $today)
+            ->whereIn('food_id', $foodsByUnidad)  // Filtras por los alimentos que pertenecen a la unidad del usuario
             ->get()
             ->map(function ($vale) {
                 return [
                     'id' => $vale->food->id,
-                    'descripcion' => $vale->food->descripcion ?? 'Sin descripción', // Asegúrate de tener una relación `food`
+                    'descripcion' => $vale->food->descripcion ?? 'Sin descripción',
                     'fecha' => Carbon::parse($vale->date)->format('Y-m-d'),
                     'estado' => $vale->status,
                 ];
             });
+
 
         $vales = $Allvales->unique('id');
 
