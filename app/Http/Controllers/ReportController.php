@@ -27,6 +27,10 @@ class ReportController extends Controller
 
         $tiposComida = Food::where('unit_id', $unidad)->pluck('descripcion', 'id');
         $comidasPorUsuario = FoodUser::where('date', 'like', $mes . '%')
+            ->join('foods', 'food_users.food_id', '=', 'foods.id')
+            ->join('users', 'food_users.user_id', '=', 'users.id')
+            ->where('foods.unit_id', $unidad)
+            ->where('users.unit_id', $unidad)
             ->with(['user', 'food'])
             ->get()
             ->groupBy(['user_id', 'food_id']);
@@ -50,7 +54,9 @@ class ReportController extends Controller
         }
         $fechaDeGeneracion = Carbon::now()->subHour(3)->format('d/m/Y H:i:s');
 
-        $nombreMesYear = Carbon::now()->locale('es')->isoFormat('MMMM/YYYY');
+        Carbon::setLocale('es');
+        $fecha = Carbon::createFromFormat('Y-m', $request->mes);
+        $nombreMesYear = $fecha->translatedFormat('F Y');
 
         $pdf = PDF::loadView('report', compact(['meals', 'fechaDeGeneracion', 'nombreMesYear']));
 
