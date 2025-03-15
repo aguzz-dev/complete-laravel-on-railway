@@ -38,16 +38,25 @@ class FoodUserController extends Controller
 
     public function guardarRacionesSeleccionadas(Request $request)
     {
-        FoodUser::where('user_id', '=', $request->userId)->delete();
-        $seleccionadas = $request->mealPlan;
-        $comidasSeleccionadas = [];
-        foreach ($seleccionadas as $item) {
-            $comidasSeleccionadas[] = [
+        // Convertir indexDay y limitDay a formato válido (YYYY-MM-DD)
+        $year = now()->year;
+        $indexDay = Carbon::createFromFormat('d-m', $request->indexDay)->format("$year-m-d");
+        $limitDay = Carbon::createFromFormat('d-m', $request->limitDay)->format("$year-m-d");
+
+        // Eliminar solo las raciones dentro del rango de fechas
+        FoodUser::where('user_id', $request->userId)
+            ->whereBetween('date', [$indexDay, $limitDay])
+            ->delete();
+
+        // Insertar las nuevas selecciones
+        $comidasSeleccionadas = collect($request->mealPlan)->map(function ($item) use ($request) {
+            return [
                 'user_id' => $request->userId,
                 'food_id' => $item['food_id'],
                 'date' => $item['date'],
             ];
-        }
+        })->toArray();
+
         FoodUser::insert($comidasSeleccionadas);
     }
 

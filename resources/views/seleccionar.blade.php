@@ -269,12 +269,15 @@
         }
 
         function submitMealPlan() {
-
             // Deshabilitar el botón "Guardar selección" para evitar múltiples envíos
             $('#submitMeals').prop('disabled', true).text('Guardando...');
 
             const today = new Date();
             const mealPlan = [];
+
+            // Obtener la fecha de la primera y última card
+            let indexDay = $('.day-card.cardDeHoy').data('date') || null;
+            let limitDay = $('.day-card:last').data('date') || null;
 
             $('.day-card').each(function() {
                 const cardDate = $(this).data('date');
@@ -302,7 +305,9 @@
                 type: 'POST',
                 data: JSON.stringify({
                     userId: {{ auth()->user()->id ?? 1 }},
-                    mealPlan: mealPlan
+                    mealPlan: mealPlan,
+                    indexDay: indexDay,
+                    limitDay: limitDay
                 }),
                 contentType: 'application/json',
                 headers: {
