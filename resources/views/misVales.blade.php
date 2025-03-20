@@ -202,7 +202,7 @@
                             </div>
                             <div class="meal-list">
                                 ${meals.map(meal => {
-                    const isUsed = meal.status === 'usado';
+                    const isUsed = meal.status == 'usado';
                     return `
                                         <div class="meal-item">
                                             <div class="meal-dot"></div>
