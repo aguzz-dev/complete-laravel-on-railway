@@ -6,61 +6,94 @@
     <link rel="icon" href="https://i.imgur.com/BLJohUm.png" type="image/x-icon">
     <title>ValesEA - Reporte {{ str_replace('/', ' ', ucwords($nombreMesYear)) }}</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; font-size: 12px; }
-        .report-title { text-align: center; margin-bottom: 20px; font-size: 16px; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background-color: #f8f9fa; font-weight: bold; }
-        .user-name { text-align: left; font-weight: bold; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            font-size: 12px;
+        }
+        .report-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .user-name {
+            text-align: left;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-
-@php
-    use Illuminate\Support\Str;
-    $tiposComida = collect($meals)->first() ? array_keys(collect($meals)->first()) : [];
-@endphp
-
-<div class="report-title">Reporte del {{ $nombreMesYear }}</div>
+<div class="report-title">
+    Reporte del {{ $nombreMesYear}}
+</div>
 
 <table>
     <thead>
     <tr>
         <th>Usuario</th>
-        @foreach($tiposComida as $comida)
-            <th title="{{ $comida }}">{{ Str::limit($comida, 15) }}</th>
-        @endforeach
-        <th>Total $</th>
+        <th>Desayuno</th>
+        <th>Almuerzo</th>
+        <th>Cena</th>
+        <th>Total $</th>  <!-- Nueva columna para el total en dinero -->
     </tr>
     </thead>
     <tbody>
     @foreach($meals as $user => $userMeals)
         <tr>
-            <td class="user-name" title="{{ $user }}">{{ Str::limit($user, 20) }}</td>
-            @foreach($tiposComida as $comida)
-                <td>{{ $userMeals[$comida]['cantidad'] ?? 0 }}</td>
-            @endforeach
+            <td class="user-name">{{ $user }}</td>
+            <td>{{ $userMeals['Desayuno']['cantidad'] ?? 0 }}</td>
+            <td>{{ $userMeals['Almuerzo']['cantidad'] ?? 0 }}</td>
+            <td>{{ $userMeals['Cena']['cantidad'] ?? 0 }}</td>
             <td>
                 ${{ number_format(
-                    collect($userMeals)->sum(fn($c) => $c['precio_total'] ?? 0), 2)
-                }}
-            </td>
+                    (float) ($userMeals['Desayuno']['precio_total'] ?? 0) +
+                    (float) ($userMeals['Almuerzo']['precio_total'] ?? 0) +
+                    (float) ($userMeals['Cena']['precio_total'] ?? 0), 2)
+                 }}
+            </td> <!-- Total en dinero por usuario -->
         </tr>
     @endforeach
     </tbody>
     <tfoot>
     <tr>
         <th>Total</th>
-        @foreach($tiposComida as $comida)
-            <td>{{ collect($meals)->sum(fn($user) => $user[$comida]['cantidad'] ?? 0) }}</td>
-        @endforeach
         <td>
-            ${{ number_format(
-                collect($meals)->sum(fn($user) =>
-                    collect($user)->sum(fn($c) => $c['precio_total'] ?? 0)
-                ), 2)
-            }}
+            {{ collect($meals)->sum(function($user) {
+                return $user['Desayuno']['cantidad'] ?? 0;
+            }) }}
         </td>
+        <td>
+            {{ collect($meals)->sum(function($user) {
+                return $user['Almuerzo']['cantidad'] ?? 0;
+            }) }}
+        </td>
+        <td>
+            {{ collect($meals)->sum(function($user) {
+                return $user['Cena']['cantidad'] ?? 0;
+            }) }}
+        </td>
+        <td>
+            ${{ number_format(collect($meals)->sum(function($user) {
+                return ($user['Desayuno']['precio_total'] ?? 0) +
+                       ($user['Almuerzo']['precio_total'] ?? 0) +
+                       ($user['Cena']['precio_total'] ?? 0);
+            }), 2) }}
+        </td> <!-- Total en dinero de todas las comidas -->
     </tr>
     </tfoot>
 </table>
@@ -68,6 +101,5 @@
 <div style="font-size: 10px; text-align: right;">
     ValesEA Reportes - Fecha de generación: {{ $fechaDeGeneracion }}
 </div>
-
 </body>
 </html>
